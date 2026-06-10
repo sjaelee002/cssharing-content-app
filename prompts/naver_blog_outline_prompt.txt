@@ -119,6 +119,19 @@ avoid_notes는 최대 3개만 작성하고, 공통 금지 표현을 반복하지
 사용자 입력:
 {{USER_INPUT_JSON}}
 
+채널 공통 Master Content Brief:
+{{MASTER_BRIEF_JSON}}
+
+Master Content Brief 활용 규칙:
+- Master Content Brief가 전략과 핵심 메시지의 1차 기준입니다.
+- user_input은 보조 제약으로만 사용하세요. 예: topic, 선택 키워드, 선택 솔루션, section_count, content_type, CTA 옵션.
+- Master Content Brief와 모순되지 않게 작성하세요.
+- user_input과 Master Brief가 충돌하면, content_type, 선택 솔루션, section_count, target_industry 같은 명시적 사용자 선택을 우선하세요.
+- 출력은 기존 Naver Blog outline JSON 형식을 유지하세요.
+- 불필요한 top-level field를 추가하지 마세요.
+- 출력은 Master Brief가 아니라 Naver Blog outline이어야 합니다.
+- 기존 블로그 구조를 유지하세요: title candidates, search intent, opening hook, core message, flow summary, sections, checklist, FAQ, CTA, avoid notes.
+
 출력은 반드시 아래 JSON 형식만 사용하세요.
 
 {

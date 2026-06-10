@@ -1,5 +1,13 @@
 const API_BASE = "http://localhost:8000";
 
+function buildHeaders(apiKey) {
+  const headers = { "Content-Type": "application/json" };
+  if (apiKey?.trim()) {
+    headers["X-Anthropic-API-Key"] = apiKey.trim();
+  }
+  return headers;
+}
+
 async function handleResponse(response) {
   if (!response.ok) {
     let message = `Request failed (${response.status})`;
@@ -21,20 +29,23 @@ export async function getApiKeyStatus() {
   return handleResponse(response);
 }
 
-export async function setApiKey(apiKey) {
-  const response = await fetch(`${API_BASE}/api/settings/api-key`, {
+export async function generateMasterBrief(userInput, apiKey = null) {
+  const response = await fetch(`${API_BASE}/api/generate-master-brief`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ api_key: apiKey }),
+    headers: buildHeaders(apiKey),
+    body: JSON.stringify({ user_input: userInput }),
   });
   return handleResponse(response);
 }
 
-export async function generateOutline(userInput) {
-  const response = await fetch(`${API_BASE}/api/generate-outline`, {
+export async function generateNaverBlogOutline(userInput, masterBrief, apiKey = null) {
+  const response = await fetch(`${API_BASE}/api/generate-naver-blog-outline`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ user_input: userInput }),
+    headers: buildHeaders(apiKey),
+    body: JSON.stringify({
+      user_input: userInput,
+      master_brief: masterBrief,
+    }),
   });
   return handleResponse(response);
 }

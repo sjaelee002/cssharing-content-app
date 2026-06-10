@@ -1,0 +1,119 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "CS Sharing Content App" [level=1] [ref=e5]
+    - paragraph [ref=e6]: 콘텐츠 주제만 입력해도 AI가 전략을 추천합니다
+  - generic [ref=e7]:
+    - heading "API Key" [level=2] [ref=e8]
+    - paragraph [ref=e9]:
+      - text: API 키는 이 페이지의 React state에만 저장됩니다. 새로고침하면 다시 입력해야 합니다. 서버
+      - code [ref=e10]: .env
+      - text: 키는 키를 입력하지 않았을 때 fallback으로 사용됩니다.
+    - generic [ref=e11]:
+      - textbox "Anthropic API key (optional)" [ref=e12]
+      - button "Use API Key" [disabled] [ref=e13]
+    - paragraph [ref=e14]: Using server .env API key
+  - main [ref=e15]:
+    - generic [ref=e16]:
+      - heading "콘텐츠 입력" [level=2] [ref=e17]
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - text: 콘텐츠 주제
+          - generic [ref=e20]: "*"
+          - textbox "콘텐츠 주제 *" [ref=e21]:
+            - /placeholder: 예) 성수기 쇼핑몰 CS대응
+            - text: 성수기 쇼핑몰 CS대응
+        - generic [ref=e22]:
+          - text: 타겟 독자
+          - generic [ref=e23]: 권장
+          - textbox "타겟 독자 권장" [ref=e24]:
+            - /placeholder: 예) 이커머스 운영팀장, 쇼핑몰 대표, CS 담당자
+            - text: 이커머스 운영팀장, 쇼핑몰 대표, CS 담당자
+        - generic [ref=e25]:
+          - text: 주요 키워드
+          - generic [ref=e26]: 권장
+          - textbox "주요 키워드 권장" [ref=e27]:
+            - /placeholder: "예)\n성수기 CS대응\n쇼핑몰 CS대행\n문의 폭증 대응"
+            - text: 성수기 CS대응 쇼핑몰 CS대행 문의 폭증 대응
+        - generic [ref=e28]:
+          - text: 글 유형
+          - combobox "글 유형" [ref=e29]:
+            - option "개념정의형"
+            - option "비교형"
+            - option "문제해결형" [selected]
+            - option "특정 산업 겨냥형"
+            - option "비용/리스크 진단형"
+            - option "솔루션 소개형"
+            - option "오해반박형"
+        - generic [ref=e30]:
+          - text: 산업군
+          - textbox "산업군" [ref=e31]:
+            - /placeholder: 예) 이커머스 / 쇼핑몰
+            - text: 이커머스 / 쇼핑몰
+        - group "연결할 CS쉐어링 솔루션" [ref=e32]:
+          - generic [ref=e33]: 연결할 CS쉐어링 솔루션
+          - paragraph [ref=e34]: 여러 개 선택 가능
+          - generic [ref=e35] [cursor=pointer]:
+            - checkbox "추천 AI CX 풀서비스" [checked] [ref=e36]
+            - generic [ref=e37]:
+              - generic [ref=e38]: 추천
+              - text: AI CX 풀서비스
+          - generic [ref=e39]:
+            - heading "CS대행 서비스" [level=3] [ref=e40]
+            - generic [ref=e41]:
+              - generic [ref=e42] [cursor=pointer]:
+                - checkbox "CS 토탈서비스" [ref=e43]
+                - generic [ref=e44]: CS 토탈서비스
+              - generic [ref=e45] [cursor=pointer]:
+                - checkbox "CS 전담 서비스" [ref=e46]
+                - generic [ref=e47]: CS 전담 서비스
+              - generic [ref=e48] [cursor=pointer]:
+                - checkbox "CS 쉐어링 서비스" [ref=e49]
+                - generic [ref=e50]: CS 쉐어링 서비스
+              - generic [ref=e51] [cursor=pointer]:
+                - checkbox "CS 시간제 서비스" [ref=e52]
+                - generic [ref=e53]: CS 시간제 서비스
+          - generic [ref=e54]:
+            - heading "프리미엄(CX) 서비스" [level=3] [ref=e55]
+            - generic [ref=e56]:
+              - generic [ref=e57] [cursor=pointer]:
+                - checkbox "운영 진단 서비스" [ref=e58]
+                - generic [ref=e59]: 운영 진단 서비스
+              - generic [ref=e60] [cursor=pointer]:
+                - checkbox "리뷰 관리 서비스" [ref=e61]
+                - generic [ref=e62]: 리뷰 관리 서비스
+              - generic [ref=e63] [cursor=pointer]:
+                - checkbox "VOC 관리 서비스" [checked] [ref=e64]
+                - generic [ref=e65]: VOC 관리 서비스
+              - generic [ref=e66] [cursor=pointer]:
+                - checkbox "상담품질 관리 서비스" [ref=e67]
+                - generic [ref=e68]: 상담품질 관리 서비스
+              - generic [ref=e69] [cursor=pointer]:
+                - checkbox "챗봇 설계 서비스" [ref=e70]
+                - generic [ref=e71]: 챗봇 설계 서비스
+              - generic [ref=e72] [cursor=pointer]:
+                - checkbox "CX 리포팅 서비스" [ref=e73]
+                - generic [ref=e74]: CX 리포팅 서비스
+          - generic [ref=e75]:
+            - heading "AI CS 솔루션" [level=3] [ref=e76]
+            - generic [ref=e77]:
+              - generic [ref=e78] [cursor=pointer]:
+                - checkbox "OASIS AICC+IPCC" [ref=e79]
+                - generic [ref=e80]: OASIS AICC+IPCC
+              - generic [ref=e81] [cursor=pointer]:
+                - checkbox "AI VOC" [ref=e82]
+                - generic [ref=e83]: AI VOC
+              - generic [ref=e84] [cursor=pointer]:
+                - checkbox "AI StandBy" [ref=e85]
+                - generic [ref=e86]: AI StandBy
+        - group [ref=e87]:
+          - generic "고급 옵션" [ref=e88] [cursor=pointer]
+          - option "운영구조 상담" [selected]
+          - option "빠른견적받기"
+          - option "AI CX 풀서비스 문의"
+          - option "CX 리포트 문의"
+        - button "생성 중..." [disabled] [ref=e95]
+    - generic [ref=e90]:
+      - generic [ref=e91]:
+        - heading "생성된 아웃라인" [level=2] [ref=e92]
+        - button "Copy Outline" [disabled] [ref=e93]
+      - textbox "아웃라인을 생성하고 있습니다..." [ref=e96]

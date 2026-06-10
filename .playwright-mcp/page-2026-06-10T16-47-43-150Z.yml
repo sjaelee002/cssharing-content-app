@@ -1,0 +1,119 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "CS Sharing Content App" [level=1] [ref=e5]
+    - paragraph [ref=e6]: 콘텐츠 주제만 입력해도 AI가 전략을 추천합니다
+  - generic [ref=e7]:
+    - heading "API Key" [level=2] [ref=e8]
+    - paragraph [ref=e9]:
+      - text: API 키는 이 페이지의 React state에만 저장됩니다. 새로고침하면 다시 입력해야 합니다. 서버
+      - code [ref=e10]: .env
+      - text: 키는 키를 입력하지 않았을 때 fallback으로 사용됩니다.
+    - generic [ref=e11]:
+      - textbox "Anthropic API key (optional)" [ref=e12]
+      - button "Use API Key" [disabled] [ref=e13]
+    - paragraph [ref=e14]: Using server .env API key
+  - main [ref=e15]:
+    - generic [ref=e16]:
+      - heading "콘텐츠 입력" [level=2] [ref=e17]
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - text: 콘텐츠 주제
+          - generic [ref=e20]: "*"
+          - textbox "콘텐츠 주제 *" [ref=e21]:
+            - /placeholder: 예) 성수기 쇼핑몰 CS대응
+            - text: 성수기 쇼핑몰 CS대응
+        - generic [ref=e22]:
+          - text: 타겟 독자
+          - generic [ref=e23]: 권장
+          - textbox "타겟 독자 권장" [ref=e24]:
+            - /placeholder: 예) 이커머스 운영팀장, 쇼핑몰 대표, CS 담당자
+            - text: 이커머스 운영팀장, 쇼핑몰 대표, CS 담당자
+        - generic [ref=e25]:
+          - text: 주요 키워드
+          - generic [ref=e26]: 권장
+          - textbox "주요 키워드 권장" [ref=e27]:
+            - /placeholder: "예)\n성수기 CS대응\n쇼핑몰 CS대행\n문의 폭증 대응"
+            - text: 성수기 CS대응 쇼핑몰 CS대행 문의 폭증 대응
+        - generic [ref=e28]:
+          - text: 글 유형
+          - combobox "글 유형" [ref=e29]:
+            - option "개념정의형"
+            - option "비교형"
+            - option "문제해결형" [selected]
+            - option "특정 산업 겨냥형"
+            - option "비용/리스크 진단형"
+            - option "솔루션 소개형"
+            - option "오해반박형"
+        - generic [ref=e30]:
+          - text: 산업군
+          - textbox "산업군" [ref=e31]:
+            - /placeholder: 예) 이커머스 / 쇼핑몰
+            - text: 이커머스 / 쇼핑몰
+        - group "연결할 CS쉐어링 솔루션" [ref=e32]:
+          - generic [ref=e33]: 연결할 CS쉐어링 솔루션
+          - paragraph [ref=e34]: 여러 개 선택 가능
+          - generic [ref=e35] [cursor=pointer]:
+            - checkbox "추천 AI CX 풀서비스" [checked] [ref=e36]
+            - generic [ref=e37]:
+              - generic [ref=e38]: 추천
+              - text: AI CX 풀서비스
+          - generic [ref=e39]:
+            - heading "CS대행 서비스" [level=3] [ref=e40]
+            - generic [ref=e41]:
+              - generic [ref=e42] [cursor=pointer]:
+                - checkbox "CS 토탈서비스" [ref=e43]
+                - generic [ref=e44]: CS 토탈서비스
+              - generic [ref=e45] [cursor=pointer]:
+                - checkbox "CS 전담 서비스" [ref=e46]
+                - generic [ref=e47]: CS 전담 서비스
+              - generic [ref=e48] [cursor=pointer]:
+                - checkbox "CS 쉐어링 서비스" [ref=e49]
+                - generic [ref=e50]: CS 쉐어링 서비스
+              - generic [ref=e51] [cursor=pointer]:
+                - checkbox "CS 시간제 서비스" [ref=e52]
+                - generic [ref=e53]: CS 시간제 서비스
+          - generic [ref=e54]:
+            - heading "프리미엄(CX) 서비스" [level=3] [ref=e55]
+            - generic [ref=e56]:
+              - generic [ref=e57] [cursor=pointer]:
+                - checkbox "운영 진단 서비스" [ref=e58]
+                - generic [ref=e59]: 운영 진단 서비스
+              - generic [ref=e60] [cursor=pointer]:
+                - checkbox "리뷰 관리 서비스" [ref=e61]
+                - generic [ref=e62]: 리뷰 관리 서비스
+              - generic [ref=e63] [cursor=pointer]:
+                - checkbox "VOC 관리 서비스" [checked] [ref=e64]
+                - generic [ref=e65]: VOC 관리 서비스
+              - generic [ref=e66] [cursor=pointer]:
+                - checkbox "상담품질 관리 서비스" [ref=e67]
+                - generic [ref=e68]: 상담품질 관리 서비스
+              - generic [ref=e69] [cursor=pointer]:
+                - checkbox "챗봇 설계 서비스" [ref=e70]
+                - generic [ref=e71]: 챗봇 설계 서비스
+              - generic [ref=e72] [cursor=pointer]:
+                - checkbox "CX 리포팅 서비스" [ref=e73]
+                - generic [ref=e74]: CX 리포팅 서비스
+          - generic [ref=e75]:
+            - heading "AI CS 솔루션" [level=3] [ref=e76]
+            - generic [ref=e77]:
+              - generic [ref=e78] [cursor=pointer]:
+                - checkbox "OASIS AICC+IPCC" [ref=e79]
+                - generic [ref=e80]: OASIS AICC+IPCC
+              - generic [ref=e81] [cursor=pointer]:
+                - checkbox "AI VOC" [ref=e82]
+                - generic [ref=e83]: AI VOC
+              - generic [ref=e84] [cursor=pointer]:
+                - checkbox "AI StandBy" [ref=e85]
+                - generic [ref=e86]: AI StandBy
+        - group [ref=e87]:
+          - generic "고급 옵션" [ref=e88] [cursor=pointer]
+          - option "운영구조 상담" [selected]
+          - option "빠른견적받기"
+          - option "AI CX 풀서비스 문의"
+          - option "CX 리포트 문의"
+        - button "아웃라인 생성" [ref=e97] [cursor=pointer]
+    - generic [ref=e90]:
+      - generic [ref=e91]:
+        - heading "생성된 아웃라인" [level=2] [ref=e92]
+        - button "Copy Outline" [ref=e93] [cursor=pointer]
+      - textbox "생성된 아웃라인이 여기에 표시됩니다." [ref=e98]: "{ \"title_candidates\": [ \"성수기 쇼핑몰 CS대응, 인력만 늘려서는 안 되는 이유\", \"문의 폭증 시즌, 응대 지연을 막는 운영구조 전략\", \"성수기 CS대행과 자체 운영, 어떤 선택이 안정적일까\" ], \"recommended_title\": \"성수기 쇼핑몰 CS대응, 인력만 늘려서는 안 되는 이유\", \"primary_keyword\": \"성수기 CS대응\", \"secondary_keywords\": [ \"쇼핑몰 CS대행\", \"문의 폭증 대응\", \"이커머스 운영 구조\" ], \"content_type\": \"문제해결형\", \"search_intent\": \"성수기가 오면 고객 문의가 몰리는데, 기존 방식으로는 응대가 버틸 수 없어 어떻게 대응할지 고민하고 있다.\", \"target_reader_summary\": \"이커머스 운영팀장, 쇼핑몰 대표, CS 담당자들이 성수기 문의 폭증 상황에서 응대 품질 저하와 인력 이탈을 동시에 경험하고 있다.\", \"opening_hook\": \"성수기가 다가올 때마다 반복되는 상담사 모집, 응대 지연, 고객 불만이라는 악순환 상황을 현장감 있게 제시한다.\", \"core_message\": \"성수기 CS 위기는 단순히 인력 부족 문제가 아니라 변동하는 수요를 흡수할 운영 구조와 AI, 외주, 내부 인력이 어떻게 역할을 나눌 것인가의 설계 문제다.\", \"flow_summary\": \"현장 문제 상황 → 기존 대응의 한계 재정의 → 구조적 원인 분석 → 자체 운영 vs 외주의 선택 기준 → 점검 체크리스트 → CS쉐어링 AI CX 풀서비스 연결 → 운영구조 상담 CTA\", \"sections\": [ { \"order\": 1, \"heading\": \"성수기마다 반복되는 CS 위기, 결국 무엇이 문제인가\", \"section_role\": \"성수기 직전의 현장 상황을 구체적으로 묘사하고, 기존에 '인력을 더 뽑으면 된다'고 생각해온 운영팀의 오해를 짚는다.\", \"key_points\": [ \"프로모션 공지 이후 갑작스럽게 몰려드는 상담 문의, 반품·교환·배송 지연 문의가 동시에 쌓이는 상황\", \"상담사 모집-온보딩-이직의 반복 악순환과 그 과정에서 발생하는 응대 품질 편차\" ] }, { \"order\": 2, \"heading\": \"인력 증원만으로는 막을 수 없는 이유: 변동 수요의 구조적 문제\", \"section_role\": \"성수기 CS 문제를 단순 인원 부족으로 보는 관점에서 벗어나, 급변하는 문의량을 운영 구조가 유연하게 대응하지 못하는 것이 실제 원인임을 설명한다.\", \"key_points\": [ \"성수기와 비성수기의 문의량 편차가 크면 고정 인력을 늘리는 것만으로는 비성수기에 인력 낭비 초래\", \"상담 품질, SOP 표준화, 신입 교육, 백업 인력 확보라는 네 가지 운영 요소가 동시에 작동하지 않으면 인원 증가만으로는 응대 만족도 개선이 어려움\" ] }, { \"order\": 3, \"heading\": \"성수기 CS 안정화 방법: 자체 운영 vs 전문 외주의 선택 기준\", \"section_role\": \"자체 운영과 외주 형태의 장단점을 직접 비교하고, 각각이 안정적으로 작동하기 위한 조건을 명확히 한다.\", \"key_points\": [ \"자체 운영은 데이터 통제와 브랜드 일관성이 장점이나 변동 수요에 유연한 대응과 24시간 백업 운영 구조 확보에 비용 부담\", \"전문 외주는 가변형 인력 운영과 즉각적인 백업이 가능하나 품질 관리, SOP 유지, VOC 데이터 분석 체계가 명확하지 않으면 책임 관계가 모호해질 수 있음\" ] }, { \"order\": 4, \"heading\": \"성수기 CS 운영 체크리스트: 현재 대응 방식이 버틸 수 있을까\", \"section_role\": \"독자가 자신의 현재 운영 상태를 진단할 수 있도록 구체적인 점검 항목을 제시하고, 부족한 부분이 성수기 위기로 이어지는 메커니즘을 설명한다.\", \"key_points\": [ \"상담 시간대별 배치 현황, 응대 품질 기준 정의, 신입 교육 체계화, 응대 불가 상황 대체 인력 확보 여부 등을 체크\", \"문의 유형별 응대 기준이 없으면 성수기에 상담사마다 다른 답변을 제공하게 되고, 이것이 재문의와 고객 불만을 증가시키는 악순환의 출발점\" ] }, { \"order\": 5, \"heading\": \"AI와 상담사의 역할 분담으로 성수기 대응력 높이기\", \"section_role\": \"성수기 대응의 구조적 해결책으로서 AI 기반 운영, VOC 데이터 활용, 표준화된 SOP의 역할을 설명하고 CS쉐어링의 AI CX 풀서비스와 자연스럽게 연결한다.\", \"key_points\": [ \"AI는 반복적인 문의(배송 상태, 환불 진행률, 교환 신청)를 선처리하고, 상담사는 복잡한 고객 감정 처리와 특수 사건 상담에 집중하는 역할 분담으로 응대 효율성과 만족도 동시 확보\", \"수집된 VOC 데이터를 분석하여 프로모션 이후 자주 받는 질문, 배송 지연 시 고객 불만 패턴 등을 파악하고 이를 바탕으로 SOP를 개선하면 반복적인 위기 대응에서 예방으로 전환\" ] } ], \"checklist_candidates\": [ \"성수기 시즌별 예상 문의량 대비 상담사 배치 계획이 세워져 있는가, 그리고 비상 인력 보충 절차가 마련되어 있는가\", \"상담 응대 기준(SOP)이 문의 유형별로 정의되어 있고 모든 상담사가 같은 수준으로 교육받았는가\", \"고객 문의를 분류하고 추적하는 VOC 시스템이 있으며, 수집된 데이터가 다음 시즌 운영 개선으로 이어지는 체계가 있는가\" ], \"faq_candidates\": [ { \"question\": \"성수기 때 외주 CS대행을 쓰면 정말 다 해결될까?\", \"answer_direction\": \"외주는 변동 수요에 유연하게 대응하는 장점이 있지만, 품질 관리(SOP 유지, 상담 톤), 데이터 분석(VOC 리포트), 고객 만족도 추적이 담당자 간 연결 고리가 되어야 하며, 단순히 외주사에만 맡기면 후속 개선이 이루어지지 않는 문제가 발생할 수 있음을 설명한다.\" }, { \"question\": \"AI 상담 도구를 도입하면 상담사를 줄일 수 있을까?\", \"answer_direction\": \"AI는 상담사를 대체하는 도구가 아니라 반복 문의를 선처리하여 상담사가 더 복잡한 고객 감정 처리에 집중하도록 돕는 역할이며, 실제 효과를 보려면 AI가 처리할 문의 유형 정의, 에스컬레이션 절차, 상담사 재교육이 함께 이루어져야 함을 설명한다.\" } ], \"cta_block\": { \"cta_heading\": \"성수기 대응 체계, 지금부터 점검하세요\", \"cta_message\": \"현재 운영 구조가 성수기를 버틸 수 있는지 진단받고, AI CX 풀서비스와 VOC 관리 서비스를 통해 자체 운영과 외주의 장점을 모두 활용하는 하이브리드 전략을 수립하세요.\", \"cta_type\": \"운영구조 상담\" }, \"avoid_notes\": [ \"성수기 CS 위기를 '절망적인', '위험한', '무너질 수 있는' 같은 공포 표현으로 과장하지 말 것. 대신 '반복되는 구조적 문제'라는 냉정한 분석으로 현장감 있게 접근할 것.\", \"인력 증원, AI 도입, 외주 선택 중 '하나만 정답'이라는 식의 이분법적 결론을 피할 것. 세 가지 요소의 역할을 명확히 하되, 각각이 성공하기 위한 조건(SOP, VOC 분석, 백업 체계)이 필수임을 강조할 것.\", \"기존 고객사 사례나 성과 수치(응대 시간 단축, 만족도 증가율 등)를 만들어내지 말 것. 대신 '일반적인 성수기 시즌의 현장 상황'과 '구조적 해결의 논리'로 설득하고, CS쉐어링의 구체적 솔루션(AI CX 풀서비스, VOC 관리 서비스)은 설명하되 보장 표현 없이 제시할 것.\" ] }"
