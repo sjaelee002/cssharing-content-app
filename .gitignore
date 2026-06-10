@@ -1,0 +1,15 @@
+.env
+jae-api-key.txt
+
+__pycache__/
+*.pyc
+
+frontend/node_modules/
+node_modules/
+
+.DS_Store
+
+outputs/drafts/
+outputs/outlines/
+outputs/reviews/
+outputs/master_briefs/

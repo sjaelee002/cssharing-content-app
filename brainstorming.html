@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CS쉐어링 콘텐츠 자동화 웹앱 브레인스토밍</title>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --ink:#172033;
+      --muted:#65728a;
+      --brand:#2f6fed;
+      --brand2:#11a37f;
+      --line:#dfe6f1;
+      --card:#ffffff;
+      --soft:#eef4ff;
+      --accent:#fff4df;
+      --danger:#fff0f0;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font-family:'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Gulim','Gothic',Arial,sans-serif;
+      line-height:1.55;
+    }
+    .deck{max-width:1180px;margin:0 auto;padding:28px 18px 70px}
+    .slide{
+      width:100%;
+      min-height:640px;
+      background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);
+      border:1px solid var(--line);
+      border-radius:28px;
+      box-shadow:0 18px 42px rgba(20,34,60,.10);
+      padding:54px 60px;
+      margin:28px 0;
+      position:relative;
+      overflow:hidden;
+    }
+    .slide::after{
+      content:attr(data-page);
+      position:absolute;right:34px;bottom:24px;color:#a4afc1;font-size:14px;font-weight:700;
+    }
+    .kicker{font-size:15px;font-weight:800;letter-spacing:.08em;color:var(--brand);text-transform:uppercase;margin-bottom:10px}
+    h1{font-size:44px;line-height:1.16;margin:0 0 20px;font-weight:900;letter-spacing:-.04em}
+    h2{font-size:34px;line-height:1.22;margin:0 0 22px;font-weight:900;letter-spacing:-.035em}
+    h3{font-size:22px;margin:0 0 10px;font-weight:900;letter-spacing:-.02em}
+    p{font-size:18px;margin:0 0 14px;color:#29344a}
+    .lead{font-size:23px;color:#33405b;max-width:900px;font-weight:650}
+    .muted{color:var(--muted)}
+    .grid{display:grid;gap:18px}
+    .grid.two{grid-template-columns:1fr 1fr}
+    .grid.three{grid-template-columns:repeat(3,1fr)}
+    .grid.four{grid-template-columns:repeat(4,1fr)}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 8px 20px rgba(20,34,60,.05)}
+    .card.blue{background:var(--soft);border-color:#cfe0ff}
+    .card.green{background:#ebfbf6;border-color:#c9efe4}
+    .card.yellow{background:var(--accent);border-color:#f4ddb0}
+    .card.red{background:var(--danger);border-color:#ffd2d2}
+    .num{display:inline-flex;width:34px;height:34px;align-items:center;justify-content:center;border-radius:50%;background:var(--brand);color:#fff;font-weight:900;margin-bottom:12px}
+    .pill{display:inline-block;padding:7px 12px;border-radius:999px;background:#edf3ff;color:#245dcc;font-size:14px;font-weight:800;margin:0 6px 8px 0}
+    .arrow{font-size:24px;color:var(--brand);font-weight:900;padding:8px 0}
+    .flow{display:flex;align-items:stretch;gap:10px;margin-top:20px}
+    .flow .step{flex:1;background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 14px;text-align:center;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;min-height:90px}
+    .flow .arr{display:flex;align-items:center;color:var(--brand);font-weight:900;font-size:26px}
+    .code{
+      background:#101827;color:#e6edf7;border-radius:18px;padding:22px;font-family:Consolas,'Courier New',monospace;font-size:15px;white-space:pre-wrap;line-height:1.5;overflow:auto;
+    }
+    table{width:100%;border-collapse:collapse;margin-top:18px;font-size:16px;background:#fff;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+    th,td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}
+    th{background:#f1f5fb;font-weight:900;color:#24324b}
+    tr:last-child td{border-bottom:0}
+    .big-number{font-size:54px;font-weight:950;color:var(--brand);line-height:1;margin-bottom:8px}
+    .note{background:#f8fbff;border-left:5px solid var(--brand);padding:16px 18px;border-radius:12px;margin-top:18px;color:#33405b;font-weight:650}
+    .footer-note{position:absolute;left:60px;bottom:24px;color:#9aa6ba;font-size:14px}
+    .title-slide{display:flex;flex-direction:column;justify-content:center;min-height:680px;background:radial-gradient(circle at top right,#dff0ff 0,#fff 38%,#fff 100%)}
+    .title-slide h1{font-size:54px;max-width:880px}
+    .subtitle{font-size:24px;color:#4b5b75;max-width:900px}
+    .mini{font-size:14px;color:#718096}
+    .check li{margin:10px 0;font-size:18px;color:#29344a}
+    ul{padding-left:22px;margin-top:10px}
+    li{margin-bottom:8px}
+    @media print{
+      body{background:#fff}
+      .deck{max-width:none;padding:0}
+      .slide{width:100vw;min-height:100vh;border:0;border-radius:0;margin:0;box-shadow:none;page-break-after:always}
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <section class="slide title-slide" data-page="01">
+      <div class="kicker">Brainstorming Deck</div>
+      <h1>CS쉐어링 콘텐츠 자동화 웹앱 구상</h1>
+      <p class="subtitle">LLM API를 활용해 팀원이 콘텐츠 Brief를 입력하고, Outline → Draft → Review → Export까지 진행하는 내부용 제작 보조 도구</p>
+      <div style="margin-top:28px">
+        <span class="pill">Python Backend</span>
+        <span class="pill">HTML/CSS/JavaScript UI</span>
+        <span class="pill">LLM API</span>
+        <span class="pill">Human-in-the-loop</span>
+      </div>
+    </section>
+
+    <section class="slide" data-page="02">
+      <div class="kicker">Goal</div>
+      <h2>목표는 “완전 자동 작성”이 아니라 “팀원이 실제로 쓸 수 있는 콘텐츠 보조 웹앱”</h2>
+      <div class="grid three">
+        <div class="card blue">
+          <div class="num">1</div>
+          <h3>입력 구조화</h3>
+          <p>주제, 타겟 독자, 키워드, 연결할 솔루션, 소목차 방향을 form으로 받는다.</p>
+        </div>
+        <div class="card green">
+          <div class="num">2</div>
+          <h3>AI 초안 생성</h3>
+          <p>기존 CS쉐어링 콘텐츠 흐름을 참고해 outline과 draft를 생성한다.</p>
+        </div>
+        <div class="card yellow">
+          <div class="num">3</div>
+          <h3>사람 검수</h3>
+          <p>팀원이 outline과 draft를 직접 수정하고, 필요한 경우에만 reviewer를 실행한다.</p>
+        </div>
+      </div>
+      <div class="note">핵심 방향: AI가 결과물을 “대신 완성”하는 게 아니라, 사람이 더 빠르게 콘텐츠를 만들 수 있도록 구조와 초안을 제공한다.</div>
+    </section>
+
+    <section class="slide" data-page="03">
+      <div class="kicker">Why not Streamlit?</div>
+      <h2>팀 배포 목적이면 Streamlit보다 FastAPI + HTML/JS가 더 적합</h2>
+      <table>
+        <tr><th>구분</th><th>Streamlit</th><th>FastAPI + HTML/JS</th></tr>
+        <tr><td>장점</td><td>Python만으로 빠르게 MVP 가능</td><td>진짜 웹페이지처럼 구성 가능, UI 자유도 높음</td></tr>
+        <tr><td>단점</td><td>서비스 화면 느낌 약함, UI 커스터마이징 제한</td><td>초기 세팅이 조금 더 필요</td></tr>
+        <tr><td>추천 용도</td><td>혼자 테스트, 내부 데모</td><td>팀원에게 링크로 배포, 장기 확장</td></tr>
+      </table>
+      <div class="note">현재 목표가 “팀원들이 들어가서 사용하는 앱”이면 FastAPI + HTML/CSS/JavaScript로 가는 것이 더 자연스럽다.</div>
+    </section>
+
+    <section class="slide" data-page="04">
+      <div class="kicker">Architecture</div>
+      <h2>전체 구조: 화면은 JavaScript, LLM 호출은 Python</h2>
+      <div class="flow">
+        <div class="step">사용자 웹페이지<br>HTML/CSS/JS</div>
+        <div class="arr">→</div>
+        <div class="step">FastAPI 서버<br>Python</div>
+        <div class="arr">→</div>
+        <div class="step">LLM API<br>GPT / Claude / Gemini</div>
+        <div class="arr">→</div>
+        <div class="step">저장 / Export<br>JSON / HTML / Markdown</div>
+      </div>
+      <div class="grid two" style="margin-top:28px">
+        <div class="card">
+          <h3>Python 역할</h3>
+          <p>Prompt 관리, LLM API 호출, RAG/검색, 저장, export 변환을 담당한다.</p>
+        </div>
+        <div class="card">
+          <h3>JavaScript 역할</h3>
+          <p>입력값을 JSON으로 서버에 보내고, 생성 결과를 화면에 표시한다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-page="05">
+      <div class="kicker">MVP Workflow</div>
+      <h2>초기 버전은 5단계 Wizard 구조로 충분</h2>
+      <div class="flow">
+        <div class="step">1. Brief 입력</div>
+        <div class="arr">→</div>
+        <div class="step">2. Outline 생성/수정</div>
+        <div class="arr">→</div>
+        <div class="step">3. Draft 생성</div>
+        <div class="arr">→</div>
+        <div class="step">4. 검토/수정</div>
+        <div class="arr">→</div>
+        <div class="step">5. Export</div>
+      </div>
+      <div class="grid two" style="margin-top:28px">
+        <div class="card blue">
+          <h3>기본 흐름</h3>
+          <p>AI는 outline과 초안을 만들고, 사람은 중간에 직접 수정한다.</p>
+        </div>
+        <div class="card green">
+          <h3>비용 통제</h3>
+          <p>Outline 수정은 API 재호출이 아니라 textarea에서 사람이 직접 수정한다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-page="06">
+      <div class="kicker">Input Form</div>
+      <h2>사용자 입력 Form: 고정 항목 + 자유 소목차</h2>
+      <div class="grid two">
+        <div class="card">
+          <h3>고정 입력</h3>
+          <ul class="check">
+            <li>콘텐츠 주제</li>
+            <li>타겟 독자</li>
+            <li>주요 키워드</li>
+            <li>콘텐츠 목적</li>
+            <li>연결할 CS쉐어링 솔루션</li>
+            <li>피해야 할 표현</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>자유 입력</h3>
+          <ul class="check">
+            <li>소목차 개수</li>
+            <li>소목차 제목</li>
+            <li>각 소목차에서 꼭 다룰 내용</li>
+            <li>정의형 / 비교형 / 문제해결형 등 글 유형</li>
+            <li>FAQ 포함 여부</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note">고정 템플릿 하나로 모든 글을 찍어내면 VOC 정의형, AICC 비교형, 성수기 대응형, AX 개념형을 모두 담기 어렵다. 그래서 자유 소목차 구조가 필요하다.</div>
+    </section>
+
+    <section class="slide" data-page="11-a">
+      <div class="kicker">Input Format</div>
+      <h2>사용자 입력 형식 예시</h2>
+      <div class="code">
+        user_input = {
+    "topic": "성수기 CS대응",
+    "target_reader": "이커머스 운영팀장",
+    "main_keywords": ["성수기 CS", "문의 폭증", "CS대행", "운영 구조"],
+    "content_goal": "성수기 CS 문제를 인력 문제가 아니라 운영 구조 문제로 인식시키기",
+    "solution_link": "AI CX 풀서비스",
+    "avoid_expressions": ["무조건", "완벽히 해결", "100%"],
+    "content_type": "문제해결형",
+    "section_count": 5,
+    "sections": [
+        {
+            "heading": "성수기 CS대응이란 무엇인가",
+            "must_include": ["프로모션", "문의량 급증", "응대 품질"]
+        },
+        {
+            "heading": "왜 인력 충원만으로 해결되지 않는가",
+            "must_include": ["채용 시차", "교육 비용", "품질 편차"]
+        }
+    ],
+    "include_faq": True
+}
+      </div>
+      <div class="note">JSON blocks를 기준으로 홈페이지 HTML, 네이버 블로그용 복붙 원고, Markdown, 미리보기 HTML로 변환한다.</div>
+    </section>
+
+    <section class="slide" data-page="07">
+      <div class="kicker">Content Types</div>
+      <h2>최근 매거진에서 확인된 콘텐츠 유형</h2>
+      <table>
+        <tr><th>유형</th><th>예시 주제</th><th>주요 구조</th></tr>
+        <tr><td>개념 정의형</td><td>AX뜻, VOC 분석</td><td>개념 정의 → 필요성 → 적용 방식 → 기대 효과</td></tr>
+        <tr><td>비교형</td><td>AICC vs AI상담솔루션, CS 아웃소싱 비교</td><td>두 방식 정의 → 차이 비교 → 선택 기준</td></tr>
+        <tr><td>문제 해결형</td><td>성수기 CS대응</td><td>현상 문제 → 구조적 원인 → 해결 구조</td></tr>
+        <tr><td>비용/리스크 진단형</td><td>상담사 퇴사</td><td>숨은 비용 → 악순환 → 운영 구조 전환</td></tr>
+        <tr><td>서비스 소개형</td><td>AI CX 풀서비스</td><td>서비스 정의 → 운영 방식 → 적합 기업</td></tr>
+      </table>
+    </section>
+
+    <section class="slide" data-page="08">
+      <div class="kicker">Core Message Pattern</div>
+      <h2>CS쉐어링 콘텐츠의 공통 설득 흐름</h2>
+      <div class="flow">
+        <div class="step">현상 문제 제기</div>
+        <div class="arr">→</div>
+        <div class="step">오해 반박</div>
+        <div class="arr">→</div>
+        <div class="step">구조적 원인 제시</div>
+        <div class="arr">→</div>
+        <div class="step">AI/사람 역할 분담</div>
+        <div class="arr">→</div>
+        <div class="step">솔루션 연결</div>
+      </div>
+      <div class="grid three" style="margin-top:28px">
+        <div class="card blue"><h3>문제</h3><p>“문의는 많은데 왜 개선되지 않을까?”</p></div>
+        <div class="card yellow"><h3>재정의</h3><p>“인력 부족이 아니라 운영 구조 문제다.”</p></div>
+        <div class="card green"><h3>해결</h3><p>“AI와 사람이 역할을 나누는 통합 운영이 필요하다.”</p></div>
+      </div>
+    </section>
+
+    <section class="slide" data-page="09">
+      <div class="kicker">LLM Pipeline</div>
+      <h2>Agent보다 먼저 “Prompt Function” 3개로 시작</h2>
+      <div class="grid three">
+        <div class="card blue">
+          <div class="num">1</div>
+          <h3>Outline Planner</h3>
+          <p>입력 form을 정리하고 콘텐츠 타입에 맞는 소목차 흐름을 만든다.</p>
+        </div>
+        <div class="card green">
+          <div class="num">2</div>
+          <h3>Draft Writer</h3>
+          <p>사람이 수정한 outline을 기준으로 본문을 생성한다.</p>
+        </div>
+        <div class="card yellow">
+          <div class="num">3</div>
+          <h3>Flow Reviewer</h3>
+          <p>중복, 비약, 어색한 CTA, 솔루션 연결의 과한 광고성을 점검한다.</p>
+        </div>
+      </div>
+      <div class="note">처음부터 섹션마다 agent를 쪼개면 비용과 문체 흔들림이 커진다. MVP는 3개의 prompt function으로 충분하다.</div>
+    </section>
+
+    <section class="slide" data-page="10">
+      <div class="kicker">Cost Control</div>
+      <h2>비용을 줄이는 핵심은 “사람이 직접 수정하는 구간”을 넣는 것</h2>
+      <table>
+        <tr><th>단계</th><th>API 호출</th><th>비용 관리 방식</th></tr>
+        <tr><td>Brief 입력</td><td>없음</td><td>사용자 입력만 저장</td></tr>
+        <tr><td>Outline 생성</td><td>1회</td><td>저렴한 모델 사용 가능</td></tr>
+        <tr><td>Outline 수정</td><td>없음</td><td>textarea에서 사람이 직접 수정</td></tr>
+        <tr><td>Draft 생성</td><td>1회</td><td>좋은 모델 사용</td></tr>
+        <tr><td>Review</td><td>선택</td><td>필요할 때만 실행</td></tr>
+      </table>
+      <div class="note">MVP 최소 비용 버전은 콘텐츠 1개당 API 호출 2회: Outline 1회 + Draft 1회.</div>
+    </section>
+
+    <section class="slide" data-page="11">
+      <div class="kicker">Output Format</div>
+      <h2>AI 생성 원본은 HTML보다 JSON Blocks가 안전</h2>
+      <div class="code">{
+  "title": "성수기 CS대응, 인력보다 중요한 것은 운영 구조입니다",
+  "category": "인사이트",
+  "keywords": ["성수기 CS", "문의 폭증", "운영 구조"],
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "성수기 CS대응이란 무엇인가" },
+    { "type": "paragraph", "text": "성수기 CS대응은..." },
+    { "type": "table", "headers": ["구분", "고정형", "가변형"], "rows": [...] },
+    { "type": "faq", "question": "상담사를 더 뽑으면 되나요?", "answer": "..." }
+  ]
+}</div>
+      <div class="note">JSON blocks를 기준으로 홈페이지 HTML, 네이버 블로그용 복붙 원고, Markdown, 미리보기 HTML로 변환한다.</div>
+    </section>
+
+    <section class="slide" data-page="12">
+      <div class="kicker">Export Strategy</div>
+      <h2>플랫폼별 Export를 분리해야 한다</h2>
+      <div class="grid three">
+        <div class="card blue">
+          <h3>홈페이지 매거진</h3>
+          <p>h2/h3, p, ul/li, table, FAQ, 이미지 위치를 HTML로 변환한다.</p>
+        </div>
+        <div class="card green">
+          <h3>네이버 블로그</h3>
+          <p>복잡한 HTML보다 에디터에 붙여넣기 쉬운 텍스트/표/이미지 위치 안내가 현실적이다.</p>
+        </div>
+        <div class="card yellow">
+          <h3>검수용 Preview</h3>
+          <p>팀원이 브라우저에서 읽고 수정할 수 있는 미리보기 HTML을 제공한다.</p>
+        </div>
+      </div>
+      <div class="note">AI의 기본 출력은 JSON/Markdown, HTML은 최종 변환 옵션으로 두는 게 안전하다.</div>
+    </section>
+
+    <section class="slide" data-page="13">
+      <div class="kicker">Roadmap</div>
+      <h2>RAG는 바로 넣지 말고 단계적으로 확장</h2>
+      <table>
+        <tr><th>버전</th><th>기능</th><th>목표</th></tr>
+        <tr><td>v0.1</td><td>최근 10개 콘텐츠 패턴을 prompt에 고정</td><td>빠른 MVP 검증</td></tr>
+        <tr><td>v0.2</td><td>콘텐츠 유형 선택: VOC형, 비교형, 성수기형 등</td><td>결과 안정화</td></tr>
+        <tr><td>v0.3</td><td>기존 매거진에서 유사 글 3개 검색</td><td>간단 RAG</td></tr>
+        <tr><td>v0.4</td><td>Embedding 기반 유사 콘텐츠 검색</td><td>정확도 향상</td></tr>
+        <tr><td>v1.0</td><td>팀원용 웹앱 + 저장/버전관리 + Export</td><td>실사용 배포</td></tr>
+      </table>
+    </section>
+
+    <section class="slide" data-page="14">
+      <div class="kicker">MVP Development Plan</div>
+      <h2>5일 단위로 쪼개면 구현 가능성이 높다</h2>
+      <div class="grid five"></div>
+      <table>
+        <tr><th>Day</th><th>작업</th><th>산출물</th></tr>
+        <tr><td>Day 1</td><td>FastAPI 서버 + 기본 HTML 페이지</td><td>입력 form 화면</td></tr>
+        <tr><td>Day 2</td><td>Outline 생성 endpoint 연결</td><td>Outline 생성/수정 화면</td></tr>
+        <tr><td>Day 3</td><td>Draft 생성 + preview</td><td>초안 생성 화면</td></tr>
+        <tr><td>Day 4</td><td>Export 기능</td><td>HTML / Naver text / JSON 저장</td></tr>
+        <tr><td>Day 5</td><td>Reviewer + 내부 테스트</td><td>팀원 테스트용 MVP</td></tr>
+      </table>
+    </section>
+
+    <section class="slide" data-page="15">
+      <div class="kicker">Risks</div>
+      <h2>주의할 리스크와 대응</h2>
+      <div class="grid two">
+        <div class="card red">
+          <h3>비용 증가</h3>
+          <p>전체 재생성 버튼 남발, reviewer 자동 실행이 비용을 키울 수 있다.</p>
+          <p><strong>대응:</strong> 사람 직접 수정 우선, 부분 재생성 버튼, 비용 경고 표시.</p>
+        </div>
+        <div class="card red">
+          <h3>문체 흔들림</h3>
+          <p>섹션별로 별도 호출하면 글 전체 톤과 흐름이 끊길 수 있다.</p>
+          <p><strong>대응:</strong> 전체 outline 기반 draft 생성 + 마지막 reviewer 사용.</p>
+        </div>
+        <div class="card red">
+          <h3>플랫폼 포맷 차이</h3>
+          <p>홈페이지와 네이버 블로그는 업로드 방식이 다를 수 있다.</p>
+          <p><strong>대응:</strong> JSON blocks를 원본으로 두고 export만 분리.</p>
+        </div>
+        <div class="card red">
+          <h3>과한 자동화</h3>
+          <p>초기부터 LangGraph/RAG/React까지 넣으면 일정이 커진다.</p>
+          <p><strong>대응:</strong> FastAPI + HTML/JS MVP부터 시작.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-page="16">
+      <div class="kicker">Folder Structure</div>
+      <h2>폴더 구성</h2>
+      <div class="grid two">
+        <div class="card red">
+          <h3>services/</h3>
+          <p><strong>llm_client.py</strong> Claude API 호출을 담당하는 공통 함수</p>
+          <p><strong>outline_generator.py</strong> generate_outline() 함수</p>
+          <p><strong>draft_generator.py</strong> generate_draft() 함수</p>
+          <p><strong>reviewer.py</strong> review_content() 함수</p>
+        </div>
+        <div class="card red">
+          <h3>prompts/</h3>
+          <p>outline_prompt.txt, draft_prompt.txt, review_prompt.txt</p>
+          <p><strong>대응:</strong> 전체 outline 기반 draft 생성 + 마지막 reviewer 사용.</p>
+        </div>
+        <div class="card red">
+          <h3>tests/</h3>
+          <p>test_outline.py, test_draft.py, test_review.py</p>
+          <p><strong>대응:</strong> JSON blocks를 원본으로 두고 export만 분리.</p>
+        </div>
+        <div class="card red">
+          <h3>outputs/</h3>
+          <p>outlines/, drafts/ ,reviews/</p>
+          <p><strong>대응:</strong> FastAPI + HTML/JS MVP부터 시작.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-page="17">
+      <div class="kicker">Recommendation</div>
+      <h2>최종 추천 구성</h2>
+      <div class="grid two">
+        <div class="card blue">
+          <div class="big-number">01</div>
+          <h3>기술 스택</h3>
+          <p>Python FastAPI + HTML/CSS/Vanilla JS + LLM API + JSON/SQLite 저장</p>
+        </div>
+        <div class="card green">
+          <div class="big-number">02</div>
+          <h3>제품 방향</h3>
+          <p>AI가 전부 작성하는 앱이 아니라, 팀원이 outline과 draft를 빠르게 만들고 수정하는 보조 도구</p>
+        </div>
+      </div>
+      <div class="note" style="font-size:20px">가장 중요한 설계 원칙: <strong>Human-in-the-loop + 비용 통제 + 플랫폼별 export 분리</strong></div>
+    </section>
+  </main>
+</body>
+</html>
