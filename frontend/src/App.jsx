@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import {
+  generateHomepageMagazineOutline,
+  generateLinkedinOutline,
   generateMasterBrief,
+  generateMetaSocialOutline,
   generateNaverBlogOutline,
   getApiKeyStatus,
 } from "./api.js";
@@ -15,6 +18,49 @@ const STEPS = [
   { id: "master-brief", label: "2. Master Brief" },
   { id: "channel-outline", label: "3. 채널별 Outline" },
 ];
+
+const CHANNEL_IDS = ["naver_blog", "homepage_magazine", "linkedin", "meta_social"];
+
+const CHANNEL_CONFIG = {
+  naver_blog: {
+    label: "네이버 블로그",
+    buttonLabel: "네이버 블로그 아웃라인 생성",
+    angleField: null,
+  },
+  homepage_magazine: {
+    label: "홈페이지 매거진",
+    buttonLabel: "홈페이지 매거진 아웃라인 생성",
+    angleField: "editorial_angle",
+  },
+  linkedin: {
+    label: "LinkedIn",
+    buttonLabel: "LinkedIn 아웃라인 생성",
+    angleField: "linkedin_angle",
+  },
+  meta_social: {
+    label: "Meta Social",
+    buttonLabel: "Meta Social 아웃라인 생성",
+    angleField: "social_angle",
+  },
+};
+
+const EMPTY_CHANNEL_OUTLINE = {
+  object: null,
+  raw: "",
+  error: "",
+  warning: "",
+  loading: false,
+  jsonDraft: null,
+  jsonError: "",
+  copyMessage: "",
+};
+
+function createInitialChannelOutlines() {
+  return CHANNEL_IDS.reduce((acc, channelId) => {
+    acc[channelId] = { ...EMPTY_CHANNEL_OUTLINE };
+    return acc;
+  }, {});
+}
 
 const RECOMMENDED_SOLUTION = "AI CX 풀서비스";
 
@@ -85,7 +131,7 @@ const EMPTY_MASTER_BRIEF = {
   channel_strategy: {
     naver_blog: "",
     homepage_magazine: "",
-    social_card: "",
+    meta_social: "",
     linkedin: "",
   },
   avoid_notes: [],
@@ -185,6 +231,8 @@ function normalizeMasterBrief(data) {
     channel_strategy: {
       ...EMPTY_MASTER_BRIEF.channel_strategy,
       ...(data.channel_strategy || {}),
+      meta_social:
+        data.channel_strategy?.meta_social || data.channel_strategy?.social_card || "",
     },
     secondary_keywords: Array.isArray(data.secondary_keywords) ? data.secondary_keywords : [],
     solution_links: Array.isArray(data.solution_links) ? data.solution_links : [],
@@ -218,6 +266,24 @@ function masterBriefToJson(masterBrief) {
   return JSON.stringify(masterBrief, null, 2);
 }
 
+function parseChannelOutlineText(text) {
+  let cleaned = text.trim();
+  if (cleaned.startsWith("```json")) cleaned = cleaned.slice(7).trim();
+  if (cleaned.startsWith("```")) cleaned = cleaned.slice(3).trim();
+  if (cleaned.endsWith("```")) cleaned = cleaned.slice(0, -3).trim();
+
+  try {
+    const parsed = JSON.parse(cleaned);
+    return { object: parsed, raw: cleaned, warning: "" };
+  } catch {
+    return {
+      object: null,
+      raw: text,
+      warning: "Outline JSON 파싱에 실패했습니다. Advanced JSON에서 수정 후 Apply하세요.",
+    };
+  }
+}
+
 export default function App() {
   const [activeStep, setActiveStep] = useState("input");
   const [form, setForm] = useState(INITIAL_FORM);
@@ -226,17 +292,12 @@ export default function App() {
   const [masterBriefWarning, setMasterBriefWarning] = useState("");
   const [masterBriefJsonDraft, setMasterBriefJsonDraft] = useState(null);
   const [masterBriefJsonError, setMasterBriefJsonError] = useState("");
-  const [outlineObject, setOutlineObject] = useState(null);
-  const [outlineRaw, setOutlineRaw] = useState("");
-  const [outlineWarning, setOutlineWarning] = useState("");
-  const [outlineJsonDraft, setOutlineJsonDraft] = useState(null);
-  const [outlineJsonError, setOutlineJsonError] = useState("");
+  const [channelOutlines, setChannelOutlines] = useState(createInitialChannelOutlines);
+  const [activeChannel, setActiveChannel] = useState("naver_blog");
+  const [plainTextCopyMessage, setPlainTextCopyMessage] = useState("");
   const [loadingMasterBrief, setLoadingMasterBrief] = useState(false);
-  const [loadingOutline, setLoadingOutline] = useState(false);
   const [error, setError] = useState("");
   const [sectionCountError, setSectionCountError] = useState("");
-  const [copyMessage, setCopyMessage] = useState("");
-  const [plainTextCopyMessage, setPlainTextCopyMessage] = useState("");
   const [masterBriefCopyMessage, setMasterBriefCopyMessage] = useState("");
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [sessionApiKey, setSessionApiKey] = useState("");
@@ -335,14 +396,35 @@ export default function App() {
     clearMasterBriefJsonDraft();
   }
 
-  function clearOutlineJsonDraft() {
-    setOutlineJsonDraft(null);
-    setOutlineJsonError("");
+  function updateChannelOutline(channelId, patch) {
+    setChannelOutlines((prev) => ({
+      ...prev,
+      [channelId]: { ...prev[channelId], ...patch },
+    }));
+  }
+
+  function updateChannelOutlineObject(channelId, updater) {
+    setChannelOutlines((prev) => {
+      const current = prev[channelId];
+      if (!current.object) return prev;
+      return {
+        ...prev,
+        [channelId]: {
+          ...current,
+          object: updater(current.object),
+          jsonDraft: null,
+          jsonError: "",
+        },
+      };
+    });
+  }
+
+  function clearChannelJsonDraft(channelId) {
+    updateChannelOutline(channelId, { jsonDraft: null, jsonError: "" });
   }
 
   function updateOutlineField(field, value) {
-    setOutlineObject((prev) => (prev ? { ...prev, [field]: value } : prev));
-    clearOutlineJsonDraft();
+    updateChannelOutlineObject("naver_blog", (prev) => ({ ...prev, [field]: value }));
   }
 
   function updateOutlineArrayField(field, text) {
@@ -350,13 +432,11 @@ export default function App() {
   }
 
   function updateOutlineSection(index, field, value) {
-    setOutlineObject((prev) => {
-      if (!prev) return prev;
+    updateChannelOutlineObject("naver_blog", (prev) => {
       const sections = [...prev.sections];
       sections[index] = { ...sections[index], [field]: value };
       return { ...prev, sections };
     });
-    clearOutlineJsonDraft();
   }
 
   function updateOutlineSectionKeyPoints(index, text) {
@@ -364,46 +444,53 @@ export default function App() {
   }
 
   function updateOutlineFaq(index, field, value) {
-    setOutlineObject((prev) => {
-      if (!prev) return prev;
+    updateChannelOutlineObject("naver_blog", (prev) => {
       const faqCandidates = [...prev.faq_candidates];
       faqCandidates[index] = { ...faqCandidates[index], [field]: value };
       return { ...prev, faq_candidates: faqCandidates };
     });
-    clearOutlineJsonDraft();
   }
 
   function updateOutlineCtaField(field, value) {
-    setOutlineObject((prev) =>
-      prev
-        ? {
-            ...prev,
-            cta_block: {
-              ...prev.cta_block,
-              [field]: value,
-            },
-          }
-        : prev
-    );
-    clearOutlineJsonDraft();
+    updateChannelOutlineObject("naver_blog", (prev) => ({
+      ...prev,
+      cta_block: {
+        ...prev.cta_block,
+        [field]: value,
+      },
+    }));
   }
 
-  function getOutlineJsonText() {
-    if (outlineJsonDraft !== null) return outlineJsonDraft;
-    if (outlineObject) return outlineToJson(outlineObject);
-    return outlineRaw;
+  function getChannelOutlineJsonText(channelId) {
+    const channel = channelOutlines[channelId];
+    if (channel.jsonDraft !== null) return channel.jsonDraft;
+    if (channel.object) {
+      return channelId === "naver_blog"
+        ? outlineToJson(channel.object)
+        : JSON.stringify(channel.object, null, 2);
+    }
+    return channel.raw;
   }
 
-  function handleApplyOutlineJson() {
-    const parsed = parseOutlineText(getOutlineJsonText());
+  function handleApplyChannelOutlineJson(channelId) {
+    const text = getChannelOutlineJsonText(channelId);
+    const parsed =
+      channelId === "naver_blog" ? parseOutlineText(text) : parseChannelOutlineText(text);
+
     if (!parsed.object) {
-      setOutlineJsonError("유효하지 않은 JSON입니다. 수정 후 다시 적용하세요.");
+      updateChannelOutline(channelId, {
+        jsonError: "유효하지 않은 JSON입니다. 수정 후 다시 적용하세요.",
+      });
       return;
     }
-    setOutlineObject(parsed.object);
-    setOutlineRaw(parsed.raw);
-    setOutlineWarning("");
-    clearOutlineJsonDraft();
+
+    updateChannelOutline(channelId, {
+      object: parsed.object,
+      raw: parsed.raw,
+      warning: "",
+      jsonDraft: null,
+      jsonError: "",
+    });
   }
 
   async function handleGenerateMasterBrief(event) {
@@ -432,28 +519,45 @@ export default function App() {
     }
   }
 
-  async function handleGenerateNaverOutline() {
+  async function handleGenerateChannelOutline(channelId) {
     if (!masterBrief) return;
 
-    setLoadingOutline(true);
+    const generators = {
+      naver_blog: generateNaverBlogOutline,
+      homepage_magazine: generateHomepageMagazineOutline,
+      linkedin: generateLinkedinOutline,
+      meta_social: generateMetaSocialOutline,
+    };
+
+    updateChannelOutline(channelId, { loading: true, error: "" });
     setError("");
 
     try {
-      const result = await generateNaverBlogOutline(
+      const result = await generators[channelId](
         buildUserInput(form),
         masterBrief,
         sessionApiKey
       );
-      const parsed = parseOutlineText(result.outline);
-      setOutlineObject(parsed.object);
-      setOutlineRaw(parsed.raw || result.outline);
-      setOutlineWarning(parsed.warning);
-      clearOutlineJsonDraft();
+      const parsed =
+        channelId === "naver_blog"
+          ? parseOutlineText(result.outline)
+          : parseChannelOutlineText(result.outline);
+
+      updateChannelOutline(channelId, {
+        object: parsed.object,
+        raw: parsed.raw || result.outline,
+        warning: parsed.warning,
+        loading: false,
+        jsonDraft: null,
+        jsonError: "",
+      });
+      setActiveChannel(channelId);
       setActiveStep("channel-outline");
     } catch (err) {
-      setError(err.message || "Failed to generate Naver Blog outline.");
-    } finally {
-      setLoadingOutline(false);
+      updateChannelOutline(channelId, {
+        loading: false,
+        error: err.message || "Failed to generate outline.",
+      });
     }
   }
 
@@ -474,24 +578,31 @@ export default function App() {
     setTimeout(() => setMasterBriefCopyMessage(""), 2000);
   }
 
-  async function handleCopyOutline() {
-    const text = outlineObject ? outlineToJson(outlineObject) : outlineRaw;
+  async function handleCopyChannelOutline(channelId) {
+    const channel = channelOutlines[channelId];
+    const text = channel.object
+      ? channelId === "naver_blog"
+        ? outlineToJson(channel.object)
+        : JSON.stringify(channel.object, null, 2)
+      : channel.raw;
+
     if (!text.trim()) {
-      setCopyMessage("복사할 아웃라인이 없습니다.");
+      updateChannelOutline(channelId, { copyMessage: "복사할 아웃라인이 없습니다." });
       return;
     }
 
     try {
       await navigator.clipboard.writeText(text);
-      setCopyMessage("아웃라인 JSON이 클립보드에 복사되었습니다.");
+      updateChannelOutline(channelId, { copyMessage: "아웃라인 JSON이 클립보드에 복사되었습니다." });
     } catch {
-      setCopyMessage("복사에 실패했습니다.");
+      updateChannelOutline(channelId, { copyMessage: "복사에 실패했습니다." });
     }
 
-    setTimeout(() => setCopyMessage(""), 2000);
+    setTimeout(() => updateChannelOutline(channelId, { copyMessage: "" }), 2000);
   }
 
   async function handleCopyPlainTextOutline() {
+    const outlineObject = channelOutlines.naver_blog.object;
     if (!outlineObject) {
       setPlainTextCopyMessage("파싱된 아웃라인이 없습니다.");
       return;
@@ -933,10 +1044,10 @@ export default function App() {
                   />
                 </label>
                 <label>
-                  social_card
+                  meta_social
                   <textarea
-                    value={masterBrief.channel_strategy.social_card}
-                    onChange={(e) => updateChannelStrategyField("social_card", e.target.value)}
+                    value={masterBrief.channel_strategy.meta_social}
+                    onChange={(e) => updateChannelStrategyField("meta_social", e.target.value)}
                     rows={2}
                   />
                 </label>
@@ -1010,43 +1121,63 @@ export default function App() {
           <p className="hint">
             Master Brief를 검토·수정한 뒤, 원하는 채널의 아웃라인을 생성하세요.
           </p>
+          <p className="hint">
+            각 채널은 수정된 Master Brief와 사용자 입력을 기준으로 독립 생성됩니다. 네이버
+            블로그 아웃라인을 다른 채널이 참고하지 않습니다.
+          </p>
 
           <div className="channel-buttons">
-            <button
-              type="button"
-              className="primary"
-              onClick={handleGenerateNaverOutline}
-              disabled={!masterBrief || loadingOutline}
-            >
-              {loadingOutline ? "생성 중..." : "네이버 블로그 아웃라인 생성"}
-            </button>
-            <button type="button" disabled>
-              홈페이지 매거진 생성 준비중
-            </button>
-            <button type="button" disabled>
-              인스타/메타 카드뉴스 생성 준비중
-            </button>
-            <button type="button" disabled>
-              링크드인 포스트 생성 준비중
-            </button>
+            {CHANNEL_IDS.map((channelId) => {
+              const config = CHANNEL_CONFIG[channelId];
+              const channel = channelOutlines[channelId];
+              return (
+                <button
+                  key={channelId}
+                  type="button"
+                  className={channelId === "naver_blog" ? "primary" : ""}
+                  onClick={() => handleGenerateChannelOutline(channelId)}
+                  disabled={!masterBrief || channel.loading}
+                >
+                  {channel.loading ? "생성 중..." : config.buttonLabel}
+                </button>
+              );
+            })}
           </div>
 
-          {outlineWarning && <p className="status warn">{outlineWarning}</p>}
+          <nav className="step-nav channel-tab-nav">
+            {CHANNEL_IDS.map((channelId) => (
+              <button
+                key={channelId}
+                type="button"
+                className={`step-tab ${activeChannel === channelId ? "active" : ""}`}
+                onClick={() => setActiveChannel(channelId)}
+              >
+                {CHANNEL_CONFIG[channelId].label}
+              </button>
+            ))}
+          </nav>
 
-          {!outlineObject && !outlineRaw ? (
+          {channelOutlines[activeChannel].error && (
+            <p className="error">{channelOutlines[activeChannel].error}</p>
+          )}
+          {channelOutlines[activeChannel].warning && (
+            <p className="status warn">{channelOutlines[activeChannel].warning}</p>
+          )}
+
+          {!channelOutlines[activeChannel].object && !channelOutlines[activeChannel].raw ? (
             <p className="hint">
-              {loadingOutline
+              {channelOutlines[activeChannel].loading
                 ? "아웃라인을 생성하고 있습니다..."
-                : "네이버 블로그 아웃라인을 생성하면 여기에 편집 화면이 표시됩니다."}
+                : `${CHANNEL_CONFIG[activeChannel].label} 아웃라인을 생성하면 여기에 편집 화면이 표시됩니다.`}
             </p>
-          ) : outlineObject ? (
+          ) : activeChannel === "naver_blog" && channelOutlines.naver_blog.object ? (
             <div className="outline-editor">
               <div className="editor-card">
                 <h3>제목 · 키워드</h3>
                 <label>
                   title_candidates
                   <textarea
-                    value={arrayToText(outlineObject.title_candidates)}
+                    value={arrayToText(channelOutlines.naver_blog.object.title_candidates)}
                     onChange={(e) => updateOutlineArrayField("title_candidates", e.target.value)}
                     rows={3}
                   />
@@ -1054,21 +1185,21 @@ export default function App() {
                 <label>
                   recommended_title
                   <input
-                    value={outlineObject.recommended_title}
+                    value={channelOutlines.naver_blog.object.recommended_title}
                     onChange={(e) => updateOutlineField("recommended_title", e.target.value)}
                   />
                 </label>
                 <label>
                   primary_keyword
                   <input
-                    value={outlineObject.primary_keyword}
+                    value={channelOutlines.naver_blog.object.primary_keyword}
                     onChange={(e) => updateOutlineField("primary_keyword", e.target.value)}
                   />
                 </label>
                 <label>
                   secondary_keywords
                   <textarea
-                    value={arrayToText(outlineObject.secondary_keywords)}
+                    value={arrayToText(channelOutlines.naver_blog.object.secondary_keywords)}
                     onChange={(e) => updateOutlineArrayField("secondary_keywords", e.target.value)}
                     rows={3}
                   />
@@ -1076,7 +1207,7 @@ export default function App() {
                 <label>
                   content_type
                   <select
-                    value={outlineObject.content_type}
+                    value={channelOutlines.naver_blog.object.content_type}
                     onChange={(e) => updateOutlineField("content_type", e.target.value)}
                   >
                     <option value="">선택</option>
@@ -1094,7 +1225,7 @@ export default function App() {
                 <label>
                   search_intent
                   <textarea
-                    value={outlineObject.search_intent}
+                    value={channelOutlines.naver_blog.object.search_intent}
                     onChange={(e) => updateOutlineField("search_intent", e.target.value)}
                     rows={2}
                   />
@@ -1102,7 +1233,7 @@ export default function App() {
                 <label>
                   target_reader_summary
                   <textarea
-                    value={outlineObject.target_reader_summary}
+                    value={channelOutlines.naver_blog.object.target_reader_summary}
                     onChange={(e) => updateOutlineField("target_reader_summary", e.target.value)}
                     rows={2}
                   />
@@ -1110,7 +1241,7 @@ export default function App() {
                 <label>
                   opening_hook
                   <textarea
-                    value={outlineObject.opening_hook}
+                    value={channelOutlines.naver_blog.object.opening_hook}
                     onChange={(e) => updateOutlineField("opening_hook", e.target.value)}
                     rows={2}
                   />
@@ -1118,7 +1249,7 @@ export default function App() {
                 <label>
                   core_message
                   <textarea
-                    value={outlineObject.core_message}
+                    value={channelOutlines.naver_blog.object.core_message}
                     onChange={(e) => updateOutlineField("core_message", e.target.value)}
                     rows={2}
                   />
@@ -1126,7 +1257,7 @@ export default function App() {
                 <label>
                   flow_summary
                   <textarea
-                    value={outlineObject.flow_summary}
+                    value={channelOutlines.naver_blog.object.flow_summary}
                     onChange={(e) => updateOutlineField("flow_summary", e.target.value)}
                     rows={2}
                   />
@@ -1135,7 +1266,7 @@ export default function App() {
 
               <div className="editor-card editor-card-wide">
                 <h3>sections</h3>
-                {outlineObject.sections.map((section, index) => (
+                {channelOutlines.naver_blog.object.sections.map((section, index) => (
                   <div key={`section-${index}`} className="nested-card">
                     <h4>Section {section.order ?? index + 1}</h4>
                     <label>
@@ -1182,12 +1313,12 @@ export default function App() {
                 <label>
                   checklist_candidates
                   <textarea
-                    value={arrayToText(outlineObject.checklist_candidates)}
+                    value={arrayToText(channelOutlines.naver_blog.object.checklist_candidates)}
                     onChange={(e) => updateOutlineArrayField("checklist_candidates", e.target.value)}
                     rows={4}
                   />
                 </label>
-                {outlineObject.faq_candidates.map((faq, index) => (
+                {channelOutlines.naver_blog.object.faq_candidates.map((faq, index) => (
                   <div key={`faq-${index}`} className="nested-card">
                     <h4>FAQ {index + 1}</h4>
                     <label>
@@ -1212,14 +1343,14 @@ export default function App() {
                 <label>
                   cta_heading
                   <input
-                    value={outlineObject.cta_block.cta_heading}
+                    value={channelOutlines.naver_blog.object.cta_block.cta_heading}
                     onChange={(e) => updateOutlineCtaField("cta_heading", e.target.value)}
                   />
                 </label>
                 <label>
                   cta_message
                   <textarea
-                    value={outlineObject.cta_block.cta_message}
+                    value={channelOutlines.naver_blog.object.cta_block.cta_message}
                     onChange={(e) => updateOutlineCtaField("cta_message", e.target.value)}
                     rows={2}
                   />
@@ -1227,7 +1358,7 @@ export default function App() {
                 <label>
                   cta_type
                   <select
-                    value={outlineObject.cta_block.cta_type}
+                    value={channelOutlines.naver_blog.object.cta_block.cta_type}
                     onChange={(e) => updateOutlineCtaField("cta_type", e.target.value)}
                   >
                     <option value="">선택</option>
@@ -1245,51 +1376,114 @@ export default function App() {
                 <label>
                   avoid_notes
                   <textarea
-                    value={arrayToText(outlineObject.avoid_notes)}
+                    value={arrayToText(channelOutlines.naver_blog.object.avoid_notes)}
                     onChange={(e) => updateOutlineArrayField("avoid_notes", e.target.value)}
                     rows={4}
                   />
                 </label>
               </div>
             </div>
+          ) : channelOutlines[activeChannel].object || channelOutlines[activeChannel].raw ? (
+            <div className="outline-editor simple-channel-panel">
+              <div className="editor-card">
+                <h3>{CHANNEL_CONFIG[activeChannel].label} Outline</h3>
+                {channelOutlines[activeChannel].object?.recommended_title && (
+                  <label>
+                    recommended_title
+                    <input
+                      readOnly
+                      value={channelOutlines[activeChannel].object.recommended_title}
+                    />
+                  </label>
+                )}
+                {channelOutlines[activeChannel].object?.core_message && (
+                  <label>
+                    core_message
+                    <textarea
+                      readOnly
+                      value={channelOutlines[activeChannel].object.core_message}
+                      rows={2}
+                    />
+                  </label>
+                )}
+                {CHANNEL_CONFIG[activeChannel].angleField &&
+                  channelOutlines[activeChannel].object?.[
+                    CHANNEL_CONFIG[activeChannel].angleField
+                  ] && (
+                    <label>
+                      {CHANNEL_CONFIG[activeChannel].angleField}
+                      <textarea
+                        readOnly
+                        value={
+                          channelOutlines[activeChannel].object[
+                            CHANNEL_CONFIG[activeChannel].angleField
+                          ]
+                        }
+                        rows={2}
+                      />
+                    </label>
+                  )}
+              </div>
+            </div>
           ) : null}
 
-          <details className="advanced-options">
-            <summary>Advanced JSON</summary>
-            <div className="advanced-options-body">
-              <p className="hint">
-                Friendly editor와 동기화됩니다. JSON을 수정한 뒤 Apply를 눌러 반영하세요.
-              </p>
-              <div className="json-action-row">
-                <button type="button" onClick={handleApplyOutlineJson}>
-                  Apply Outline JSON
-                </button>
-                <button type="button" onClick={handleCopyOutline}>
-                  Copy Outline JSON
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCopyPlainTextOutline}
-                  disabled={!outlineObject}
-                >
-                  Copy Plain Text Outline
-                </button>
+          {(channelOutlines[activeChannel].object || channelOutlines[activeChannel].raw) && (
+            <details className="advanced-options">
+              <summary>Advanced JSON — {CHANNEL_CONFIG[activeChannel].label}</summary>
+              <div className="advanced-options-body">
+                <p className="hint">
+                  JSON을 수정한 뒤 Apply를 눌러 반영하세요.
+                  {activeChannel === "naver_blog"
+                    ? " Friendly editor와 동기화됩니다."
+                    : ""}
+                </p>
+                <div className="json-action-row">
+                  <button
+                    type="button"
+                    onClick={() => handleApplyChannelOutlineJson(activeChannel)}
+                  >
+                    Apply Outline JSON
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyChannelOutline(activeChannel)}
+                  >
+                    Copy Outline JSON
+                  </button>
+                  {activeChannel === "naver_blog" && (
+                    <button
+                      type="button"
+                      onClick={handleCopyPlainTextOutline}
+                      disabled={!channelOutlines.naver_blog.object}
+                    >
+                      Copy Plain Text Outline
+                    </button>
+                  )}
+                </div>
+                {channelOutlines[activeChannel].jsonError && (
+                  <p className="field-error">{channelOutlines[activeChannel].jsonError}</p>
+                )}
+                {channelOutlines[activeChannel].copyMessage && (
+                  <p className="status ok">{channelOutlines[activeChannel].copyMessage}</p>
+                )}
+                {plainTextCopyMessage && activeChannel === "naver_blog" && (
+                  <p className="status ok">{plainTextCopyMessage}</p>
+                )}
+                <textarea
+                  className="outline-output"
+                  value={getChannelOutlineJsonText(activeChannel)}
+                  onChange={(e) => {
+                    updateChannelOutline(activeChannel, {
+                      jsonDraft: e.target.value,
+                      jsonError: "",
+                    });
+                  }}
+                  placeholder="생성된 아웃라인 JSON"
+                  rows={20}
+                />
               </div>
-              {outlineJsonError && <p className="field-error">{outlineJsonError}</p>}
-              {copyMessage && <p className="status ok">{copyMessage}</p>}
-              {plainTextCopyMessage && <p className="status ok">{plainTextCopyMessage}</p>}
-              <textarea
-                className="outline-output"
-                value={getOutlineJsonText()}
-                onChange={(e) => {
-                  setOutlineJsonDraft(e.target.value);
-                  setOutlineJsonError("");
-                }}
-                placeholder="생성된 아웃라인 JSON"
-                rows={20}
-              />
-            </div>
-          </details>
+            </details>
+          )}
         </section>
       )}
     </div>

@@ -1,4 +1,5 @@
 import json
+from collections.abc import Callable
 from typing import Annotated, Any
 
 from dotenv import load_dotenv
@@ -6,9 +7,13 @@ from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+from services.homepage_magazine_outline_generator import generate_outline as generate_homepage_magazine_outline
+from services.json_utils import clean_json_response
+from services.linkedin_outline_generator import generate_outline as generate_linkedin_outline
 from services.llm_client import api_key_source, has_api_key, set_runtime_api_key
 from services.master_content_builder import generate_master_brief
-from services.outline_generator import clean_json_response, generate_outline
+from services.meta_social_outline_generator import generate_outline as generate_meta_social_outline
+from services.naver_blog_outline_generator import generate_outline as generate_naver_blog_outline
 
 load_dotenv()
 
@@ -40,12 +45,12 @@ class GenerateMasterBriefResponse(BaseModel):
     master_brief: str
 
 
-class GenerateNaverBlogOutlineRequest(BaseModel):
+class GenerateChannelOutlineRequest(BaseModel):
     user_input: dict[str, Any]
-    master_brief: dict[str, Any] | str
+    master_brief: dict[str, Any] | str | None = None
 
 
-class GenerateNaverBlogOutlineResponse(BaseModel):
+class GenerateChannelOutlineResponse(BaseModel):
     outline: str
 
 
@@ -94,6 +99,53 @@ def _parse_master_brief_payload(master_brief: dict[str, Any] | str) -> dict[str,
     return master_brief
 
 
+def _require_master_brief(body: GenerateChannelOutlineRequest) -> dict[str, Any]:
+    if body.master_brief is None:
+        raise HTTPException(
+            status_code=400,
+            detail="master_brief is required. Generate or provide a Master Brief first.",
+        )
+
+    if isinstance(body.master_brief, str) and not body.master_brief.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="master_brief is required. Generate or provide a Master Brief first.",
+        )
+
+    return _parse_master_brief_payload(body.master_brief)
+
+
+def _run_channel_outline_generation(
+    body: GenerateChannelOutlineRequest,
+    generate_fn: Callable[..., str],
+    failure_detail: str,
+    api_key: str | None,
+) -> GenerateChannelOutlineResponse:
+    if not has_api_key(api_key):
+        raise HTTPException(
+            status_code=400,
+            detail="API key is not configured. Set ANTHROPIC_API_KEY in .env or provide one in the UI.",
+        )
+
+    try:
+        master_brief = _require_master_brief(body)
+        outline = generate_fn(
+            user_input=body.user_input,
+            api_key=api_key,
+            master_brief=master_brief,
+        )
+        outline = clean_json_response(outline)
+        return GenerateChannelOutlineResponse(outline=outline)
+    except HTTPException:
+        raise
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=failure_detail) from exc
+
+
 @app.post("/api/generate-outline", response_model=GenerateOutlineResponse)
 def generate_outline_endpoint(
     body: GenerateOutlineRequest,
@@ -121,9 +173,8 @@ def generate_outline_endpoint(
                 detail="Failed to parse master brief JSON.",
             ) from exc
 
-        outline = generate_outline(
+        outline = generate_naver_blog_outline(
             user_input=body.user_input,
-            channel="naver_blog",
             api_key=x_anthropic_api_key,
             master_brief=master_brief,
         )
@@ -168,32 +219,53 @@ def generate_master_brief_endpoint(
         raise HTTPException(status_code=500, detail="Failed to generate master brief.") from exc
 
 
-@app.post("/api/generate-naver-blog-outline", response_model=GenerateNaverBlogOutlineResponse)
+@app.post("/api/generate-naver-blog-outline", response_model=GenerateChannelOutlineResponse)
 def generate_naver_blog_outline_endpoint(
-    body: GenerateNaverBlogOutlineRequest,
+    body: GenerateChannelOutlineRequest,
     x_anthropic_api_key: Annotated[str | None, Header(alias="X-Anthropic-API-Key")] = None,
-) -> GenerateNaverBlogOutlineResponse:
-    if not has_api_key(x_anthropic_api_key):
-        raise HTTPException(
-            status_code=400,
-            detail="API key is not configured. Set ANTHROPIC_API_KEY in .env or provide one in the UI.",
-        )
+) -> GenerateChannelOutlineResponse:
+    return _run_channel_outline_generation(
+        body=body,
+        generate_fn=generate_naver_blog_outline,
+        failure_detail="Failed to generate Naver Blog outline.",
+        api_key=x_anthropic_api_key,
+    )
 
-    try:
-        master_brief = _parse_master_brief_payload(body.master_brief)
-        outline = generate_outline(
-            user_input=body.user_input,
-            channel="naver_blog",
-            api_key=x_anthropic_api_key,
-            master_brief=master_brief,
-        )
-        outline = clean_json_response(outline)
-        return GenerateNaverBlogOutlineResponse(outline=outline)
-    except HTTPException:
-        raise
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    except FileNotFoundError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail="Failed to generate Naver Blog outline.") from exc
+
+@app.post("/api/generate-homepage-magazine-outline", response_model=GenerateChannelOutlineResponse)
+def generate_homepage_magazine_outline_endpoint(
+    body: GenerateChannelOutlineRequest,
+    x_anthropic_api_key: Annotated[str | None, Header(alias="X-Anthropic-API-Key")] = None,
+) -> GenerateChannelOutlineResponse:
+    return _run_channel_outline_generation(
+        body=body,
+        generate_fn=generate_homepage_magazine_outline,
+        failure_detail="Failed to generate Homepage Magazine outline.",
+        api_key=x_anthropic_api_key,
+    )
+
+
+@app.post("/api/generate-linkedin-outline", response_model=GenerateChannelOutlineResponse)
+def generate_linkedin_outline_endpoint(
+    body: GenerateChannelOutlineRequest,
+    x_anthropic_api_key: Annotated[str | None, Header(alias="X-Anthropic-API-Key")] = None,
+) -> GenerateChannelOutlineResponse:
+    return _run_channel_outline_generation(
+        body=body,
+        generate_fn=generate_linkedin_outline,
+        failure_detail="Failed to generate LinkedIn outline.",
+        api_key=x_anthropic_api_key,
+    )
+
+
+@app.post("/api/generate-meta-social-outline", response_model=GenerateChannelOutlineResponse)
+def generate_meta_social_outline_endpoint(
+    body: GenerateChannelOutlineRequest,
+    x_anthropic_api_key: Annotated[str | None, Header(alias="X-Anthropic-API-Key")] = None,
+) -> GenerateChannelOutlineResponse:
+    return _run_channel_outline_generation(
+        body=body,
+        generate_fn=generate_meta_social_outline,
+        failure_detail="Failed to generate Meta Social outline.",
+        api_key=x_anthropic_api_key,
+    )

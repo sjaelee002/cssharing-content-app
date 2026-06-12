@@ -1,4 +1,5 @@
-from services.outline_generator import clean_json_response, generate_outline
+from services.json_utils import clean_json_response
+from services.naver_blog_outline_generator import generate_outline
 
 
 user_input = {

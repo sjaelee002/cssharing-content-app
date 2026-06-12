@@ -49,3 +49,39 @@ export async function generateNaverBlogOutline(userInput, masterBrief, apiKey = 
   });
   return handleResponse(response);
 }
+
+export async function generateHomepageMagazineOutline(userInput, masterBrief, apiKey = null) {
+  const response = await fetch(`${API_BASE}/api/generate-homepage-magazine-outline`, {
+    method: "POST",
+    headers: buildHeaders(apiKey),
+    body: JSON.stringify({
+      user_input: userInput,
+      master_brief: masterBrief,
+    }),
+  });
+  return handleResponse(response);
+}
+
+export async function generateLinkedinOutline(userInput, masterBrief, apiKey = null) {
+  const response = await fetch(`${API_BASE}/api/generate-linkedin-outline`, {
+    method: "POST",
+    headers: buildHeaders(apiKey),
+    body: JSON.stringify({
+      user_input: userInput,
+      master_brief: masterBrief,
+    }),
+  });
+  return handleResponse(response);
+}
+
+export async function generateMetaSocialOutline(userInput, masterBrief, apiKey = null) {
+  const response = await fetch(`${API_BASE}/api/generate-meta-social-outline`, {
+    method: "POST",
+    headers: buildHeaders(apiKey),
+    body: JSON.stringify({
+      user_input: userInput,
+      master_brief: masterBrief,
+    }),
+  });
+  return handleResponse(response);
+}

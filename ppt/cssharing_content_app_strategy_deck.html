@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CS쉐어링 콘텐츠 자동화 2주차 정리</title>
+<style>
+  :root{
+    --navy:#0f172a;
+    --navy2:#16213f;
+    --ink:#1f2937;
+    --muted:#6b7280;
+    --line:#dbe4f0;
+    --bg:#f6f8fc;
+    --card:#ffffff;
+    --blue:#2563eb;
+    --cyan:#06b6d4;
+    --green:#16a34a;
+    --amber:#f59e0b;
+    --violet:#7c3aed;
+    --red:#ef4444;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:#dfe6f2;
+    font-family:'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic','맑은 고딕',Arial,sans-serif;
+    color:var(--ink);
+  }
+  .deck{
+    width:1280px;
+    margin:0 auto;
+    padding:24px 0;
+  }
+  .slide{
+    position:relative;
+    width:1280px;
+    height:720px;
+    margin:0 auto 28px;
+    background:var(--bg);
+    overflow:hidden;
+    border-radius:20px;
+    box-shadow:0 24px 60px rgba(15,23,42,.18);
+    padding:56px 64px;
+  }
+  .slide.dark{
+    color:#fff;
+    background:
+      radial-gradient(circle at 18% 20%, rgba(6,182,212,.22), transparent 28%),
+      radial-gradient(circle at 82% 78%, rgba(124,58,237,.28), transparent 32%),
+      linear-gradient(135deg,#0f172a 0%,#111b35 52%,#07111f 100%);
+  }
+  h1,h2,h3,p{margin:0}
+  h1{font-size:54px;line-height:1.12;font-weight:850;letter-spacing:-1.5px}
+  h2{font-size:34px;line-height:1.2;font-weight:820;letter-spacing:-.9px;color:var(--navy)}
+  .dark h2{color:#fff}
+  h3{font-size:22px;font-weight:800;color:var(--navy);letter-spacing:-.3px}
+  .dark h3{color:#fff}
+  p,li{font-size:18px;line-height:1.52;letter-spacing:-.2px}
+  .subtitle{font-size:22px;line-height:1.45;color:#cbd5e1;max-width:780px;margin-top:22px}
+  .kicker{font-size:15px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+  .dark .kicker{color:#67e8f9}
+  .lead{font-size:22px;line-height:1.45;color:#475569;margin-top:16px;max-width:980px}
+  .muted{color:var(--muted)}
+  .grid{display:grid;gap:20px}
+  .grid.two{grid-template-columns:1fr 1fr}
+  .grid.three{grid-template-columns:repeat(3,1fr)}
+  .grid.four{grid-template-columns:repeat(4,1fr)}
+  .card{
+    background:var(--card);
+    border:1px solid rgba(15,23,42,.08);
+    border-radius:22px;
+    padding:22px;
+    box-shadow:0 12px 30px rgba(15,23,42,.08);
+  }
+  .pill{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:7px 12px;border-radius:999px;
+    background:#e0f2fe;color:#075985;font-size:14px;font-weight:800;
+    margin-bottom:14px;
+  }
+  .pill.green{background:#dcfce7;color:#166534}
+  .pill.violet{background:#ede9fe;color:#5b21b6}
+  .pill.amber{background:#fef3c7;color:#92400e}
+  .pill.red{background:#fee2e2;color:#991b1b}
+  .small{font-size:15px;line-height:1.45;color:#64748b}
+  .metric{
+    font-size:44px;font-weight:900;letter-spacing:-1px;color:var(--navy);
+  }
+  .arrow{font-size:34px;color:#94a3b8;align-self:center;justify-self:center}
+  .flow{display:grid;grid-template-columns:1.15fr .25fr 1.25fr .25fr 1.55fr;gap:14px;margin-top:28px;align-items:stretch}
+  .flow .node{background:#fff;border-radius:22px;padding:22px;border:1px solid #dbe4f0;box-shadow:0 14px 30px rgba(15,23,42,.08)}
+  .node-title{font-size:21px;font-weight:850;color:var(--navy);margin-bottom:10px;letter-spacing:-.3px}
+  .node-desc{font-size:16px;line-height:1.45;color:#64748b}
+  .stage-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:20px}
+  .channel{padding:18px;border-radius:20px;background:#fff;border:1px solid #e2e8f0;min-height:160px}
+  .channel .emoji{font-size:32px;margin-bottom:8px}
+  .channel h3{font-size:20px;margin-bottom:8px}
+  ul.clean{list-style:none;padding:0;margin:14px 0 0}
+  ul.clean li{position:relative;padding-left:20px;margin-bottom:9px;font-size:16px;color:#475569}
+  ul.clean li:before{content:'•';position:absolute;left:0;color:var(--blue);font-weight:900}
+  .lane{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:26px}
+  .field-list{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+  .field{border-radius:16px;background:#f8fafc;border:1px solid #e5edf7;padding:13px 15px;font-size:15px;font-weight:750;color:#334155}
+  .field span{display:block;font-weight:500;color:#64748b;margin-top:5px;font-size:13px;line-height:1.35}
+  .brief-schema{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;margin-top:24px}
+  .schema-box{background:#fff;border-radius:22px;border:1px solid #dbe4f0;padding:24px;box-shadow:0 12px 28px rgba(15,23,42,.08)}
+  .tag-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .tag{font-size:14px;font-weight:800;padding:9px 12px;border-radius:999px;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0}
+  .architecture{display:grid;grid-template-columns:1fr .26fr 1fr;gap:20px;margin-top:28px;align-items:stretch}
+  .stack{background:#fff;border-radius:24px;padding:24px;border:1px solid #dbe4f0;box-shadow:0 14px 30px rgba(15,23,42,.08)}
+  .file{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;margin-top:10px;font-size:14px;color:#0f172a}
+  .roadmap{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:26px}
+  .step{background:#fff;border:1px solid #e2e8f0;border-radius:22px;padding:22px;min-height:250px;box-shadow:0 12px 28px rgba(15,23,42,.08)}
+  .step-num{width:38px;height:38px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;margin-bottom:14px}
+  .note{background:#fff7ed;border:1px solid #fed7aa;border-radius:18px;padding:18px;margin-top:18px;color:#7c2d12;font-size:16px;line-height:1.48}
+  .status-row{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:28px}
+  .status{border-radius:22px;background:#fff;padding:24px;border:1px solid #e2e8f0;box-shadow:0 12px 28px rgba(15,23,42,.08)}
+  .status b{display:block;font-size:20px;color:var(--navy);margin-bottom:8px}
+  .topbar{position:absolute;top:0;left:0;right:0;height:10px;background:linear-gradient(90deg,var(--blue),var(--cyan),var(--green))}
+  .accent-circle{position:absolute;right:-120px;top:-120px;width:340px;height:340px;border-radius:50%;background:rgba(37,99,235,.12)}
+  .accent-circle.two{left:-130px;bottom:-160px;top:auto;right:auto;background:rgba(6,182,212,.14)}
+  @media print{
+    body{background:#fff}
+    .deck{width:100%;padding:0}
+    .slide{margin:0;border-radius:0;box-shadow:none;page-break-after:always}
+  }
+  .screenshot-lane {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  }
+  .screenshot-lane .card {
+    height: 260px;
+    padding: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .screenshot-lane img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+</style>
+</head>
+<body>
+<div class="deck">
+
+<section class="slide dark">
+  <div class="accent-circle"></div><div class="accent-circle two"></div>
+  <div class="kicker">2주차: CS Sharing 자동화 파이프라인 구축</div>
+  <h1>CS쉐어링 콘텐츠 자동화<br/>워크플로우 정리</h1>
+  <p class="subtitle">React + FastAPI + Claude API 기반으로 사용자 입력을 Master Brief로 구조화하고, 채널별 콘텐츠 생성으로 확장하는 내부 도구 설계 기록</p>
+  <div style="margin-top:62px;display:flex;gap:14px;flex-wrap:wrap">
+    <span class="pill">Master Brief</span>
+    <span class="pill green">Naver Blog Outline</span>
+    <span class="pill violet">Multi-channel Ready</span>
+    <span class="pill amber">Editable Workflow</span>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="topbar"></div>
+  <div class="kicker">Pipeline Overview</div>
+  <h2>전체 파이프라인: 사용자 입력 → Master Brief → 채널별 Outline → 콘텐츠 생성</h2>
+  <p class="lead">먼저 채널 공통 메시지 구조를 만들고 이를 각 채널에 맞게 변환</p>
+  <div class="flow">
+    <div class="node">
+      <div class="node-title">1. User Input</div>
+      <div class="node-desc">주제, 타겟, 키워드, 글 유형, 산업군, 연결 솔루션, (선택) 고급 옵션</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="node">
+      <div class="node-title">2. Master Brief</div>
+      <div class="node-desc">Claude API 1회 호출. 채널 공통 문제·오해·구조적 원인·핵심 메시지 생성. 사용자가 수정 가능.</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="node">
+      <div class="node-title">3. Channel Outlines</div>
+      <div class="node-desc">수정된 Master Brief를 기준으로 네이버 블로그, 매거진, 소셜, 링크드인용 outline 생성.</div>
+    </div>
+  </div>
+  <div class="stage-row">
+    <div class="channel"><div class="emoji">📝</div><h3>네이버 블로그</h3><p class="small">검색 유입형 문제 해결 구조. FAQ와 CTA 포함.</p></div>
+    <div class="channel"><div class="emoji">🏢</div><h3>홈페이지 매거진</h3><p class="small">공식적이고 정제된 인사이트 아티클.</p></div>
+    <div class="channel"><div class="emoji">🖼️</div><h3>인스타/메타</h3><p class="small">카드뉴스, 캡션, 시각화 brief 중심.</p></div>
+    <div class="channel"><div class="emoji">💼</div><h3>링크드인</h3><p class="small">B2B 운영 인사이트와 전문가 톤.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="topbar"></div>
+  <div class="kicker">Input Design</div>
+  <h2>사용자 입력: 쉬운 필드와 고급 옵션을 분리</h2>
+  <p class="lead">일반 사용자가 전략적 원인이나 오해를 바로 작성하기 어려울 수 있기 때문에, 필수 입력은 최소화하고 나머지는 AI의 도움을 받아 Master Brief 생성할 수 있도록 설계</p>
+  <div class="lane">
+    <div class="card">
+      <span class="pill green">Primary Input</span>
+      <h3>항상 보이는 입력값</h3>
+      <div class="field-list">
+        <div class="field">콘텐츠 주제<span>예: 성수기 쇼핑몰 CS대응</span></div>
+        <div class="field">타겟 독자<span>운영팀장, 쇼핑몰 대표, CS 담당자</span></div>
+        <div class="field">주요 키워드<span>줄바꿈 또는 콤마로 입력</span></div>
+        <div class="field">글 유형<span>개념정의형 / 비교형 / 문제해결형 등</span></div>
+        <div class="field">산업군<span>이커머스, 쇼핑몰, 렌탈 등</span></div>
+        <div class="field">연결 솔루션<span>체크박스로 다중 선택</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <span class="pill amber">Advanced Options</span>
+      <h3>비워둬도 되는 고급 입력값</h3>
+      <ul class="clean">
+        <li>독자 상황: AI가 주제·산업군·솔루션을 기반으로 추천</li>
+        <li>반박할 오해: 표면적 해결책을 AI가 추론</li>
+        <li>구조적 원인: 운영 구조 관점으로 보완</li>
+        <li>콘텐츠 목표: 기본값은 검색 유입 + 상담 고려 유도</li>
+        <li>CTA 유형: 기본값은 운영구조 상담</li>
+        <li>섹션 수: 4~6 범위만 허용. Default는 5개</li>
+      </ul>
+      <div class="note">avoid expressions는 사용자에게 묻지 않고 prompt의 고정 안전규칙으로 처리</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="topbar"></div>
+  <div class="kicker">Master Content Brief</div>
+  <h2>Master Brief: 4개 채널로 뻗기 전의 공통 전략</h2>
+  <p class="lead">Master Brief는 4개 채널로 분리 전 “무엇을 말할지”를 정리하는 채널 중립 레이어.</p>
+  <p class="lead">사용자는 카드형 editor에서 내용을 수정가능하고 JSON에 반영할 수 있음.</p>
+  <div class="brief-schema">
+    <div class="schema-box">
+      <h3>주요 필드</h3>
+      <div class="tag-row">
+        <span class="tag">core_problem</span>
+        <span class="tag">reader_context</span>
+        <span class="tag">misconception</span>
+        <span class="tag">structural_cause</span>
+        <span class="tag">core_message</span>
+        <span class="tag">solution_links</span>
+        <span class="tag">cta_direction</span>
+        <span class="tag">channel_strategy</span>
+        <span class="tag">avoid_notes</span>
+      </div>
+      <ul class="clean" style="margin-top:24px">
+        <li>채널별 문체가 아니라 공통 메시지와 논리 구조를 정리</li>
+        <li>각 채널별 outline generator가 참고할 전략 JSON 생성</li>
+        <li>빈 고급 입력값은 AI가 추천/가정 수준으로 보완</li>
+      </ul>
+    </div>
+    <div class="schema-box">
+      <h3>왜 필요한가</h3>
+      <ul class="clean">
+        <li>네이버 블로그, 매거진, 카드뉴스, 링크드인의 메시지 일관성 확보</li>
+        <li>유저가 먼저 공통 전략을 검수한 뒤 채널별 생성 가능</li>
+        <li>향후 reviewer가 채널별 톤과 공통 메시지 충돌 여부를 점검할 수 있음</li>
+      </ul>
+      <div class="note">현재 검증: Master Brief의 core_message를 수정한 뒤 블로그 outline 생성 시 해당 방향이 반영됨</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="topbar"></div>
+  <div class="kicker">Channel Generators</div>
+  <h2>채널별 생성 구조: 같은 메시지, 다른 포맷</h2>
+  <p class="lead">각 채널은 Master Brief를 공통 원천으로 사용하지만, 출력 형식과 문체는 독립적으로 최적화한다.</p>
+  <div class="grid four" style="margin-top:26px">
+    <div class="card">
+      <span class="pill green">Naver Blog</span>
+      <h3>검색 유입형</h3>
+      <ul class="clean"><li>문제 제기</li><li>오해 반박</li><li>구조적 원인</li><li>체크리스트/FAQ/CTA</li></ul>
+    </div>
+    <div class="card">
+      <span class="pill">Magazine</span>
+      <h3>공식 인사이트형</h3>
+      <ul class="clean"><li>더 정제된 문장</li><li>브랜드 전문성</li><li>광고성 CTA 축소</li><li>매거진 본문 생성</li></ul>
+    </div>
+    <div class="card">
+      <span class="pill violet">Meta</span>
+      <h3>카드뉴스형</h3>
+      <ul class="clean"><li>슬라이드별 메시지</li><li>visual brief</li><li>캡션</li><li>Figma/이미지 생성 연계</li></ul>
+    </div>
+    <div class="card">
+      <span class="pill amber">LinkedIn</span>
+      <h3>B2B 인사이트형</h3>
+      <ul class="clean"><li>짧은 hook</li><li>운영 관점</li><li>전문가 톤</li><li>질문형 마무리</li></ul>
+    </div>
+  </div>
+  <div class="flow" style="grid-template-columns:1fr .2fr 1fr .2fr 1fr;margin-top:28px">
+    <div class="node"><div class="node-title">Outline</div><div class="node-desc">채널별 구조 설계</div></div>
+    <div class="arrow">→</div>
+    <div class="node"><div class="node-title">Draft / Copy</div><div class="node-desc">본문·캡션·슬라이드 문구 생성</div></div>
+    <div class="arrow">→</div>
+    <div class="node"><div class="node-title">Visual & Review</div><div class="node-desc">필요 시 Figma/이미지 brief 생성 후 reviewer API로 검수</div></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="topbar"></div>
+  <div class="kicker">Backend Architecture</div>
+  <h2>Backend: FastAPI가 Python 서비스와 프롬프트를 연결</h2>
+  <p class="lead">React는 화면과 입력을 담당하고, FastAPI는 API key 처리, prompt 조립, Claude API 호출, 결과 반환을 담당한다.</p>
+  <p class="lead">csssharing_content_app 폴더에서 uvicorn app:app --reload --host 0.0.0.0 --port 8000</p>
+  <div class="architecture">
+    <div class="stack">
+      <span class="pill">services/</span>
+      <h3>Python 서비스 레이어</h3>
+      <div class="file">llm_client.py<br/><span class="small">Claude API 호출, request/session/.env key 우선순위 처리</span></div>
+      <div class="file">master_content_builder.py<br/><span class="small">Master Brief prompt 조립 및 API 호출</span></div>
+      <div class="file">outline_generator.py<br/><span class="small">현재는 Naver Blog Outline 역할. 추후 이름 변경 후보</span></div>
+    </div>
+    <div class="arrow">↔</div>
+    <div class="stack">
+      <span class="pill green">prompts/ & FastAPI</span>
+      <h3>프롬프트와 API 엔드포인트</h3>
+      <div class="file">master_content_brief_prompt.txt</div>
+      <div class="file">naver_blog_outline_prompt.txt</div>
+      <div class="file">homepage_magazine_outline_prompt.txt</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="topbar"></div>
+  <div class="kicker">Frontend Architecture</div>
+  <h2>Frontend: React + Vite 기반 단계형 편집 UI</h2>
+  <p class="lead">프론트엔드: 사용자가 AI 결과를 검토하고 수정하는 작업 공간</p>
+  <p class="lead">cssharing_content_app/frontend 폴더에서 npm run dev</p>
+  <div class="status-row">
+    <div class="status"><b>Step 1. 사용자 입력</b><p class="small">Primary fields + Advanced Options. 어려운 필드는 비워두면 Master Brief에서 추론.</p></div>
+    <div class="status"><b>Step 2. Master Brief</b><p class="small">카드형 editor로 수정 가능. Advanced JSON은 Apply 버튼으로 반영.</p></div>
+    <div class="status"><b>Step 3. 채널별 Outline</b><p class="small">현재 네이버 블로그 구현 완료. 다른 채널은 버튼 구현 예정.</p></div>
+  </div>
+  <div class="lane screenshot-lane" style="margin-top:26px">
+    <div class="card">
+      <img src="images/week2/user_input_page.png" alt="User Input Page" />
+    </div>
+    <div class="card">
+      <img src="images/week2/master_brief_page.png" alt="Master Brief Page" />
+    </div>
+    <div class="card">
+      <img src="images/week2/channel_outline_page.png" alt="Channel Outline Page" />
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="topbar"></div>
+  <div class="kicker">Deployment Path</div>
+  <h2>현재 localhost에서 웹/앱 형태로 확장하는 방향</h2>
+  <p class="lead">현재는 로컬 개발 서버지만, 구조는 배포 가능한 웹앱 형태로 발전 목표로 함</p>
+  <div class="roadmap">
+    <div class="step"><div class="step-num">1</div><h3>Local MVP</h3><p class="small">localhost:5173 React UI, localhost:8000 FastAPI. 현재 구현 단계.</p></div>
+    <div class="step"><div class="step-num">2</div><h3>Team Demo</h3><p class="small">private GitHub checkpoint, 로컬 시연 또는 화면 녹화. API key는 사용자가 세션마다 입력.</p></div>
+    <div class="step"><div class="step-num">3</div><h3>Web Deployment</h3><p class="small">Frontend는 Vercel/Netlify, Backend는 Cloud Run/Render/Railway 등으로 분리 배포 가능.</p></div>
+    <div class="step"><div class="step-num">4</div><h3>App-like Packaging</h3><p class="small">필요 시 Electron/Tauri 검토. 단, Python backend 패키징 복잡도 때문에 후순위.</p></div>
+  </div>
+  <div class="note">우선순위는 desktop 앱 패키징보다 웹 배포와 팀원이 쓰기 쉬운 UI 안정화다.</div>
+</section>
+
+<section class="slide">
+  <div class="topbar"></div>
+  <div class="kicker">Issues & Next Moves</div>
+  <h2>겪은 문제와 해결 방향</h2>
+  <p class="lead">“AI 호출이 된다”를 넘어서, 비용·수정·멀티채널 확장을 고려한 워크플로우로 정리되었다.</p>
+  <div class="grid three" style="margin-top:26px">
+    <div class="card"><span class="pill red">문제</span><h3>한 번에 2회 호출</h3><p class="small">기존 버튼은 Master Brief와 Blog Outline을 동시에 생성해 수정 기회와 비용 통제가 어려웠다.</p><ul class="clean"><li>버튼 분리</li><li>Master Brief 먼저 검수</li></ul></div>
+    <div class="card"><span class="pill amber">문제</span><h3>JSON 직접 수정 부담</h3><p class="small">사용자가 raw JSON을 직접 수정하면 문법 오류 가능성이 있었다.</p><ul class="clean"><li>카드형 editor</li><li>Apply JSON 검증</li></ul></div>
+    <div class="card"><span class="pill green">해결</span><h3>확장 가능한 레이어</h3><p class="small">Master Brief를 공통 source로 두어 채널별 톤과 구조를 독립적으로 설계할 수 있게 되었다.</p><ul class="clean"><li>Blog Outline 검증 완료</li><li>다음은 Magazine/Social/LinkedIn</li></ul></div>
+  </div>
+  <div class="status-row" style="margin-top:22px">
+    <div class="status"><b>다음 1</b><p class="small">homepage_magazine_generator.py 추가</p></div>
+    <div class="status"><b>다음 2</b><p class="small">social_card_generator.py로 카드뉴스 plan + visual brief 생성</p></div>
+    <div class="status"><b>다음 3</b><p class="small">저장 기능: outputs/master_briefs, outlines, drafts에 export</p></div>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

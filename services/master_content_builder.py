@@ -1,18 +1,12 @@
 import json
 import os
-from pathlib import Path
 
 from services.llm_client import call_claude
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-PROMPT_PATH = PROJECT_ROOT / "prompts" / "master_content_brief_prompt.txt"
+from services.prompt_loader import load_prompt
 
 
 def load_master_brief_prompt() -> str:
-    if not PROMPT_PATH.exists():
-        raise FileNotFoundError(f"Prompt file not found: {PROMPT_PATH}")
-
-    return PROMPT_PATH.read_text(encoding="utf-8")
+    return load_prompt("core", "master_content_brief.md")
 
 
 def build_master_brief_prompt(user_input: dict) -> str:
