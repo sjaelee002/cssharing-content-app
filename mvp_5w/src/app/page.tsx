@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 
+import { AccessGate } from "@/components/AccessGate";
 import { ChannelOutput } from "@/components/ChannelOutput";
 import { ChannelTabs } from "@/components/ChannelTabs";
 import { DraftPanel } from "@/components/DraftPanel";
@@ -34,6 +35,14 @@ async function fetchHighPerformanceReferences(limit = 20) {
 }
 
 export default function HomePage() {
+  return (
+    <AccessGate>
+      <ContentOsApp />
+    </AccessGate>
+  );
+}
+
+function ContentOsApp() {
   const { state, dispatch, addLog, hasHydrated } = useContentState();
   const [toast, setToast] = useState<string | null>(null);
   const [savingChannels, setSavingChannels] = useState<Partial<Record<Channel, boolean>>>({});
