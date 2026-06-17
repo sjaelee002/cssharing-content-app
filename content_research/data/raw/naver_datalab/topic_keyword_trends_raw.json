@@ -1,0 +1,954 @@
+{
+  "created_at": "2026-06-16T18:00:35",
+  "api": "Naver DataLab Search Trend",
+  "interpretation_note": "All ratios are relative trends from Naver DataLab, not absolute search volume.",
+  "period": {
+    "startDate": "2025-01-01",
+    "endDate": "2026-06-15",
+    "timeUnit": "month"
+  },
+  "selected_keywords": [
+    {
+      "keyword": "보험 고객센터",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "금융/보험"
+    },
+    {
+      "keyword": "금융 CS 품질관리",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "금융/보험"
+    },
+    {
+      "keyword": "금융 CS 외주",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "금융/보험"
+    },
+    {
+      "keyword": "렌탈 고객센터",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "렌탈/구독/AS"
+    },
+    {
+      "keyword": "AS 상담 운영",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "렌탈/구독/AS"
+    },
+    {
+      "keyword": "구독 서비스 VOC",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "렌탈/구독/AS"
+    },
+    {
+      "keyword": "쇼핑몰 CS 대행",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "이커머스/쇼핑몰"
+    },
+    {
+      "keyword": "쇼핑몰 고객센터 운영",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "이커머스/쇼핑몰"
+    },
+    {
+      "keyword": "쇼핑몰 VOC 분석",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "이커머스/쇼핑몰"
+    },
+    {
+      "keyword": "병원 고객센터",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "병원/헬스케어"
+    },
+    {
+      "keyword": "병원 민원 응대",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "병원/헬스케어"
+    },
+    {
+      "keyword": "병원 전화 문의",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "병원/헬스케어"
+    },
+    {
+      "keyword": "제품 AS 고객센터",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "제조/유통"
+    },
+    {
+      "keyword": "유통 고객센터",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "제조/유통"
+    },
+    {
+      "keyword": "제품 VOC 분석",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "제조/유통"
+    },
+    {
+      "keyword": "통신 고객센터",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "통신"
+    },
+    {
+      "keyword": "인터넷 장애 문의",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "통신"
+    },
+    {
+      "keyword": "통신 상담 품질",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "통신"
+    },
+    {
+      "keyword": "프랜차이즈 고객센터",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "외식/서비스"
+    },
+    {
+      "keyword": "예약 문의 고객센터",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "외식/서비스"
+    },
+    {
+      "keyword": "서비스 VOC",
+      "keyword_source": "topic_main_keyword",
+      "priority_industry": "외식/서비스"
+    },
+    {
+      "keyword": "고객센터 운영",
+      "keyword_source": "ai_cx_common",
+      "priority_industry": "AI/CX 공통"
+    },
+    {
+      "keyword": "CS 대행",
+      "keyword_source": "ai_cx_common",
+      "priority_industry": "AI/CX 공통"
+    },
+    {
+      "keyword": "고객센터 아웃소싱",
+      "keyword_source": "ai_cx_common",
+      "priority_industry": "AI/CX 공통"
+    },
+    {
+      "keyword": "AI 상담",
+      "keyword_source": "ai_cx_common",
+      "priority_industry": "AI/CX 공통"
+    },
+    {
+      "keyword": "AI VOC",
+      "keyword_source": "ai_cx_common",
+      "priority_industry": "AI/CX 공통"
+    },
+    {
+      "keyword": "CX 관리",
+      "keyword_source": "ai_cx_common",
+      "priority_industry": "AI/CX 공통"
+    },
+    {
+      "keyword": "쇼핑몰 교환 반품 문의",
+      "keyword_source": "priority_industry_longtail",
+      "priority_industry": "이커머스/쇼핑몰"
+    },
+    {
+      "keyword": "렌탈 AS 접수",
+      "keyword_source": "priority_industry_longtail",
+      "priority_industry": "렌탈/구독/AS"
+    },
+    {
+      "keyword": "병원 예약 상담",
+      "keyword_source": "priority_industry_longtail",
+      "priority_industry": "병원/헬스케어"
+    }
+  ],
+  "requests": [
+    {
+      "chunk": 1,
+      "request": {
+        "startDate": "2025-01-01",
+        "endDate": "2026-06-15",
+        "timeUnit": "month",
+        "keywordGroups": [
+          {
+            "groupName": "보험 고객센터",
+            "keywords": [
+              "보험 고객센터"
+            ]
+          },
+          {
+            "groupName": "금융 CS 품질관리",
+            "keywords": [
+              "금융 CS 품질관리"
+            ]
+          },
+          {
+            "groupName": "금융 CS 외주",
+            "keywords": [
+              "금융 CS 외주"
+            ]
+          },
+          {
+            "groupName": "렌탈 고객센터",
+            "keywords": [
+              "렌탈 고객센터"
+            ]
+          },
+          {
+            "groupName": "AS 상담 운영",
+            "keywords": [
+              "AS 상담 운영"
+            ]
+          }
+        ]
+      },
+      "response": {
+        "startDate": "2025-01-01",
+        "endDate": "2026-06-16",
+        "timeUnit": "month",
+        "results": [
+          {
+            "title": "보험 고객센터",
+            "keywords": [
+              "보험 고객센터"
+            ],
+            "data": [
+              {
+                "period": "2025-01-01",
+                "ratio": 74.07407
+              },
+              {
+                "period": "2025-02-01",
+                "ratio": 100
+              },
+              {
+                "period": "2025-03-01",
+                "ratio": 37.77777
+              },
+              {
+                "period": "2025-04-01",
+                "ratio": 37.03703
+              },
+              {
+                "period": "2025-05-01",
+                "ratio": 30.37037
+              },
+              {
+                "period": "2025-06-01",
+                "ratio": 53.33333
+              },
+              {
+                "period": "2025-07-01",
+                "ratio": 30.37037
+              },
+              {
+                "period": "2025-08-01",
+                "ratio": 34.07407
+              },
+              {
+                "period": "2025-09-01",
+                "ratio": 20
+              },
+              {
+                "period": "2025-10-01",
+                "ratio": 24.44444
+              },
+              {
+                "period": "2025-11-01",
+                "ratio": 20
+              },
+              {
+                "period": "2025-12-01",
+                "ratio": 26.66666
+              },
+              {
+                "period": "2026-01-01",
+                "ratio": 18.51851
+              },
+              {
+                "period": "2026-02-01",
+                "ratio": 8.14814
+              },
+              {
+                "period": "2026-03-01",
+                "ratio": 7.4074
+              },
+              {
+                "period": "2026-04-01",
+                "ratio": 28.88888
+              },
+              {
+                "period": "2026-05-01",
+                "ratio": 3.7037
+              },
+              {
+                "period": "2026-06-01",
+                "ratio": 7.4074
+              }
+            ]
+          },
+          {
+            "title": "금융 CS 품질관리",
+            "keywords": [
+              "금융 CS 품질관리"
+            ],
+            "data": []
+          },
+          {
+            "title": "금융 CS 외주",
+            "keywords": [
+              "금융 CS 외주"
+            ],
+            "data": []
+          },
+          {
+            "title": "렌탈 고객센터",
+            "keywords": [
+              "렌탈 고객센터"
+            ],
+            "data": []
+          },
+          {
+            "title": "AS 상담 운영",
+            "keywords": [
+              "AS 상담 운영"
+            ],
+            "data": []
+          }
+        ]
+      },
+      "error": ""
+    },
+    {
+      "chunk": 2,
+      "request": {
+        "startDate": "2025-01-01",
+        "endDate": "2026-06-15",
+        "timeUnit": "month",
+        "keywordGroups": [
+          {
+            "groupName": "구독 서비스 VOC",
+            "keywords": [
+              "구독 서비스 VOC"
+            ]
+          },
+          {
+            "groupName": "쇼핑몰 CS 대행",
+            "keywords": [
+              "쇼핑몰 CS 대행"
+            ]
+          },
+          {
+            "groupName": "쇼핑몰 고객센터 운영",
+            "keywords": [
+              "쇼핑몰 고객센터 운영"
+            ]
+          },
+          {
+            "groupName": "쇼핑몰 VOC 분석",
+            "keywords": [
+              "쇼핑몰 VOC 분석"
+            ]
+          },
+          {
+            "groupName": "병원 고객센터",
+            "keywords": [
+              "병원 고객센터"
+            ]
+          }
+        ]
+      },
+      "response": {
+        "startDate": "2025-01-01",
+        "endDate": "2026-06-16",
+        "timeUnit": "month",
+        "results": [
+          {
+            "title": "구독 서비스 VOC",
+            "keywords": [
+              "구독 서비스 VOC"
+            ],
+            "data": []
+          },
+          {
+            "title": "쇼핑몰 CS 대행",
+            "keywords": [
+              "쇼핑몰 CS 대행"
+            ],
+            "data": [
+              {
+                "period": "2025-08-01",
+                "ratio": 100
+              },
+              {
+                "period": "2025-09-01",
+                "ratio": 56.89655
+              },
+              {
+                "period": "2025-10-01",
+                "ratio": 17.24137
+              },
+              {
+                "period": "2025-11-01",
+                "ratio": 44.82758
+              },
+              {
+                "period": "2025-12-01",
+                "ratio": 22.41379
+              },
+              {
+                "period": "2026-01-01",
+                "ratio": 31.03448
+              },
+              {
+                "period": "2026-05-01",
+                "ratio": 8.62068
+              }
+            ]
+          },
+          {
+            "title": "쇼핑몰 고객센터 운영",
+            "keywords": [
+              "쇼핑몰 고객센터 운영"
+            ],
+            "data": []
+          },
+          {
+            "title": "쇼핑몰 VOC 분석",
+            "keywords": [
+              "쇼핑몰 VOC 분석"
+            ],
+            "data": []
+          },
+          {
+            "title": "병원 고객센터",
+            "keywords": [
+              "병원 고객센터"
+            ],
+            "data": [
+              {
+                "period": "2025-02-01",
+                "ratio": 10.34482
+              }
+            ]
+          }
+        ]
+      },
+      "error": ""
+    },
+    {
+      "chunk": 3,
+      "request": {
+        "startDate": "2025-01-01",
+        "endDate": "2026-06-15",
+        "timeUnit": "month",
+        "keywordGroups": [
+          {
+            "groupName": "병원 민원 응대",
+            "keywords": [
+              "병원 민원 응대"
+            ]
+          },
+          {
+            "groupName": "병원 전화 문의",
+            "keywords": [
+              "병원 전화 문의"
+            ]
+          },
+          {
+            "groupName": "제품 AS 고객센터",
+            "keywords": [
+              "제품 AS 고객센터"
+            ]
+          },
+          {
+            "groupName": "유통 고객센터",
+            "keywords": [
+              "유통 고객센터"
+            ]
+          },
+          {
+            "groupName": "제품 VOC 분석",
+            "keywords": [
+              "제품 VOC 분석"
+            ]
+          }
+        ]
+      },
+      "response": {
+        "startDate": "2025-01-01",
+        "endDate": "2026-06-16",
+        "timeUnit": "month",
+        "results": [
+          {
+            "title": "병원 민원 응대",
+            "keywords": [
+              "병원 민원 응대"
+            ],
+            "data": []
+          },
+          {
+            "title": "병원 전화 문의",
+            "keywords": [
+              "병원 전화 문의"
+            ],
+            "data": []
+          },
+          {
+            "title": "제품 AS 고객센터",
+            "keywords": [
+              "제품 AS 고객센터"
+            ],
+            "data": []
+          },
+          {
+            "title": "유통 고객센터",
+            "keywords": [
+              "유통 고객센터"
+            ],
+            "data": []
+          },
+          {
+            "title": "제품 VOC 분석",
+            "keywords": [
+              "제품 VOC 분석"
+            ],
+            "data": []
+          }
+        ]
+      },
+      "error": ""
+    },
+    {
+      "chunk": 4,
+      "request": {
+        "startDate": "2025-01-01",
+        "endDate": "2026-06-15",
+        "timeUnit": "month",
+        "keywordGroups": [
+          {
+            "groupName": "통신 고객센터",
+            "keywords": [
+              "통신 고객센터"
+            ]
+          },
+          {
+            "groupName": "인터넷 장애 문의",
+            "keywords": [
+              "인터넷 장애 문의"
+            ]
+          },
+          {
+            "groupName": "통신 상담 품질",
+            "keywords": [
+              "통신 상담 품질"
+            ]
+          },
+          {
+            "groupName": "프랜차이즈 고객센터",
+            "keywords": [
+              "프랜차이즈 고객센터"
+            ]
+          },
+          {
+            "groupName": "예약 문의 고객센터",
+            "keywords": [
+              "예약 문의 고객센터"
+            ]
+          }
+        ]
+      },
+      "response": {
+        "startDate": "2025-01-01",
+        "endDate": "2026-06-16",
+        "timeUnit": "month",
+        "results": [
+          {
+            "title": "통신 고객센터",
+            "keywords": [
+              "통신 고객센터"
+            ],
+            "data": []
+          },
+          {
+            "title": "인터넷 장애 문의",
+            "keywords": [
+              "인터넷 장애 문의"
+            ],
+            "data": []
+          },
+          {
+            "title": "통신 상담 품질",
+            "keywords": [
+              "통신 상담 품질"
+            ],
+            "data": []
+          },
+          {
+            "title": "프랜차이즈 고객센터",
+            "keywords": [
+              "프랜차이즈 고객센터"
+            ],
+            "data": []
+          },
+          {
+            "title": "예약 문의 고객센터",
+            "keywords": [
+              "예약 문의 고객센터"
+            ],
+            "data": []
+          }
+        ]
+      },
+      "error": ""
+    },
+    {
+      "chunk": 5,
+      "request": {
+        "startDate": "2025-01-01",
+        "endDate": "2026-06-15",
+        "timeUnit": "month",
+        "keywordGroups": [
+          {
+            "groupName": "서비스 VOC",
+            "keywords": [
+              "서비스 VOC"
+            ]
+          },
+          {
+            "groupName": "고객센터 운영",
+            "keywords": [
+              "고객센터 운영"
+            ]
+          },
+          {
+            "groupName": "CS 대행",
+            "keywords": [
+              "CS 대행"
+            ]
+          },
+          {
+            "groupName": "고객센터 아웃소싱",
+            "keywords": [
+              "고객센터 아웃소싱"
+            ]
+          },
+          {
+            "groupName": "AI 상담",
+            "keywords": [
+              "AI 상담"
+            ]
+          }
+        ]
+      },
+      "response": {
+        "startDate": "2025-01-01",
+        "endDate": "2026-06-16",
+        "timeUnit": "month",
+        "results": [
+          {
+            "title": "서비스 VOC",
+            "keywords": [
+              "서비스 VOC"
+            ],
+            "data": []
+          },
+          {
+            "title": "고객센터 운영",
+            "keywords": [
+              "고객센터 운영"
+            ],
+            "data": [
+              {
+                "period": "2025-11-01",
+                "ratio": 1.69154
+              },
+              {
+                "period": "2025-12-01",
+                "ratio": 0.49751
+              }
+            ]
+          },
+          {
+            "title": "CS 대행",
+            "keywords": [
+              "CS 대행"
+            ],
+            "data": [
+              {
+                "period": "2025-01-01",
+                "ratio": 71.84079
+              },
+              {
+                "period": "2025-02-01",
+                "ratio": 92.93532
+              },
+              {
+                "period": "2025-03-01",
+                "ratio": 94.42786
+              },
+              {
+                "period": "2025-04-01",
+                "ratio": 66.66666
+              },
+              {
+                "period": "2025-05-01",
+                "ratio": 25.57213
+              },
+              {
+                "period": "2025-06-01",
+                "ratio": 25.47263
+              },
+              {
+                "period": "2025-07-01",
+                "ratio": 43.28358
+              },
+              {
+                "period": "2025-08-01",
+                "ratio": 100
+              },
+              {
+                "period": "2025-09-01",
+                "ratio": 92.53731
+              },
+              {
+                "period": "2025-10-01",
+                "ratio": 66.86567
+              },
+              {
+                "period": "2025-11-01",
+                "ratio": 76.91542
+              },
+              {
+                "period": "2025-12-01",
+                "ratio": 70.64676
+              },
+              {
+                "period": "2026-01-01",
+                "ratio": 77.81094
+              },
+              {
+                "period": "2026-02-01",
+                "ratio": 55.82089
+              },
+              {
+                "period": "2026-03-01",
+                "ratio": 53.23383
+              },
+              {
+                "period": "2026-04-01",
+                "ratio": 53.63184
+              },
+              {
+                "period": "2026-05-01",
+                "ratio": 45.57213
+              },
+              {
+                "period": "2026-06-01",
+                "ratio": 36.91542
+              }
+            ]
+          },
+          {
+            "title": "고객센터 아웃소싱",
+            "keywords": [
+              "고객센터 아웃소싱"
+            ],
+            "data": [
+              {
+                "period": "2025-08-01",
+                "ratio": 5.57213
+              },
+              {
+                "period": "2025-09-01",
+                "ratio": 1.09452
+              },
+              {
+                "period": "2025-10-01",
+                "ratio": 0.99502
+              },
+              {
+                "period": "2025-11-01",
+                "ratio": 2.28855
+              },
+              {
+                "period": "2025-12-01",
+                "ratio": 2.08955
+              },
+              {
+                "period": "2026-01-01",
+                "ratio": 0.49751
+              }
+            ]
+          },
+          {
+            "title": "AI 상담",
+            "keywords": [
+              "AI 상담"
+            ],
+            "data": [
+              {
+                "period": "2025-01-01",
+                "ratio": 37.21393
+              },
+              {
+                "period": "2025-02-01",
+                "ratio": 46.36815
+              },
+              {
+                "period": "2025-03-01",
+                "ratio": 62.58706
+              },
+              {
+                "period": "2025-04-01",
+                "ratio": 57.61194
+              },
+              {
+                "period": "2025-05-01",
+                "ratio": 55.12437
+              },
+              {
+                "period": "2025-06-01",
+                "ratio": 50.44776
+              },
+              {
+                "period": "2025-07-01",
+                "ratio": 53.83084
+              },
+              {
+                "period": "2025-08-01",
+                "ratio": 52.63681
+              },
+              {
+                "period": "2025-09-01",
+                "ratio": 56.81592
+              },
+              {
+                "period": "2025-10-01",
+                "ratio": 53.03482
+              },
+              {
+                "period": "2025-11-01",
+                "ratio": 55.52238
+              },
+              {
+                "period": "2025-12-01",
+                "ratio": 34.82587
+              },
+              {
+                "period": "2026-01-01",
+                "ratio": 46.66666
+              },
+              {
+                "period": "2026-02-01",
+                "ratio": 46.56716
+              },
+              {
+                "period": "2026-03-01",
+                "ratio": 59.50248
+              },
+              {
+                "period": "2026-04-01",
+                "ratio": 46.36815
+              },
+              {
+                "period": "2026-05-01",
+                "ratio": 65.17412
+              },
+              {
+                "period": "2026-06-01",
+                "ratio": 23.18407
+              }
+            ]
+          }
+        ]
+      },
+      "error": ""
+    },
+    {
+      "chunk": 6,
+      "request": {
+        "startDate": "2025-01-01",
+        "endDate": "2026-06-15",
+        "timeUnit": "month",
+        "keywordGroups": [
+          {
+            "groupName": "AI VOC",
+            "keywords": [
+              "AI VOC"
+            ]
+          },
+          {
+            "groupName": "CX 관리",
+            "keywords": [
+              "CX 관리"
+            ]
+          },
+          {
+            "groupName": "쇼핑몰 교환 반품 문의",
+            "keywords": [
+              "쇼핑몰 교환 반품 문의"
+            ]
+          },
+          {
+            "groupName": "렌탈 AS 접수",
+            "keywords": [
+              "렌탈 AS 접수"
+            ]
+          },
+          {
+            "groupName": "병원 예약 상담",
+            "keywords": [
+              "병원 예약 상담"
+            ]
+          }
+        ]
+      },
+      "response": {
+        "startDate": "2025-01-01",
+        "endDate": "2026-06-16",
+        "timeUnit": "month",
+        "results": [
+          {
+            "title": "AI VOC",
+            "keywords": [
+              "AI VOC"
+            ],
+            "data": []
+          },
+          {
+            "title": "CX 관리",
+            "keywords": [
+              "CX 관리"
+            ],
+            "data": []
+          },
+          {
+            "title": "쇼핑몰 교환 반품 문의",
+            "keywords": [
+              "쇼핑몰 교환 반품 문의"
+            ],
+            "data": []
+          },
+          {
+            "title": "렌탈 AS 접수",
+            "keywords": [
+              "렌탈 AS 접수"
+            ],
+            "data": []
+          },
+          {
+            "title": "병원 예약 상담",
+            "keywords": [
+              "병원 예약 상담"
+            ],
+            "data": [
+              {
+                "period": "2025-04-01",
+                "ratio": 100
+              }
+            ]
+          }
+        ]
+      },
+      "error": ""
+    }
+  ]
+}
