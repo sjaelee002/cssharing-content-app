@@ -1,5 +1,11 @@
 import { BASE_PROMPTS } from "@/lib/prompts/base-prompts";
+import {
+  formatNaverBlogGuideForPrompt,
+  NAVER_BLOG_GUIDE_VERSION,
+} from "@/lib/prompts/channel-guides/naver-blog-guide";
 import type { Channel, PromptContext } from "@/lib/types";
+
+export const BLOG_NAVER_GUIDE_VERSION = NAVER_BLOG_GUIDE_VERSION;
 
 export function buildPrompt(
   channel: Channel,
@@ -14,6 +20,10 @@ export function buildPrompt(
     .replace(/\{tone\}/g, ctx.tone)
     .replace(/\{contentType\}/g, ctx.contentType)
     .replace(/\{goal\}/g, ctx.goal);
+
+  if (channel === "Blog") {
+    prompt += `\n\n${formatNaverBlogGuideForPrompt()}`;
+  }
 
   const globalRules = ctx.globalRules
     .filter((r) => r.enabled)
@@ -42,6 +52,25 @@ export function buildPrompt(
     prompt += "\n\n[이전 고도화 지시사항 - 반영해주세요]";
     refinements.forEach((r, i) => {
       prompt += `\n${i + 1}. ${r}`;
+    });
+  }
+
+  const references = (ctx.references || []).slice(0, 5);
+  if (references.length > 0) {
+    prompt += "\n\n[고성과 참고자료 - 아래 스타일/구조를 참고해 반영해주세요]";
+    references.forEach((ref, i) => {
+      prompt += `\n\n(참고 ${i + 1})`;
+      prompt += `\n- 채널: ${ref.channel}`;
+      if (ref.contentType) {
+        prompt += `\n- 유형: ${ref.contentType}`;
+      }
+      if (ref.goal) {
+        prompt += `\n- 목표: ${ref.goal}`;
+      }
+      if (ref.tone) {
+        prompt += `\n- 톤: ${ref.tone}`;
+      }
+      prompt += `\n- 본문:\n${ref.content}`;
     });
   }
 

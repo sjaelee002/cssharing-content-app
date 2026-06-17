@@ -5,23 +5,28 @@ import { useCallback, useEffect, useReducer } from "react";
 import { createDefaultGlobalRules } from "@/lib/prompts/default-rules";
 import {
   formatTime,
+  getDefaultPersistedState,
   loadPersistedState,
   savePersistedState,
 } from "@/lib/local-storage";
 import type {
   Channel,
+  ChannelSaveState,
   ContentState,
   ContentType,
   Goal,
   LogEntry,
   LogType,
+  PersistedState,
   RightPanel,
   Rule,
+  SavedContentReference,
   Tone,
 } from "@/lib/types";
 
 type Action =
   | { type: "HYDRATE"; payload: Partial<ContentState> }
+  | { type: "HYDRATE_FROM_STORAGE"; payload: PersistedState }
   | { type: "SET_DRAFT"; payload: string }
   | { type: "SET_CONTENT_TYPE"; payload: ContentType }
   | { type: "SET_GOAL"; payload: Goal }
@@ -31,6 +36,18 @@ type Action =
   | { type: "SET_RULE_SUB_TAB"; payload: "global" | "channel" }
   | { type: "SET_EDITING_RULE_CH"; payload: Channel }
   | { type: "SET_REFINE_PROMPT"; payload: string }
+  | { type: "SET_REFERENCES_ENABLED"; payload: boolean }
+  | { type: "SET_AVAILABLE_REFERENCES"; payload: SavedContentReference[] }
+  | { type: "TOGGLE_REFERENCE_SELECTION"; payload: string }
+  | {
+      type: "MARK_CHANNEL_SAVED";
+      payload: {
+        channel: Channel;
+        isHighPerformance: boolean;
+        savedAt: string;
+        contentId: string;
+      };
+    }
   | { type: "TOGGLE_GLOBAL_RULE"; payload: string }
   | { type: "REMOVE_GLOBAL_RULE"; payload: string }
   | { type: "ADD_GLOBAL_RULE"; payload: string }
@@ -54,22 +71,20 @@ type Action =
   | { type: "CLEAR_LOG" };
 
 function createInitialState(): ContentState {
-  const persisted = loadPersistedState();
+  const defaults = getDefaultPersistedState();
   return {
-    ...persisted,
+    ...defaults,
     generating: {},
     rightPanel: "rules",
-    log: [
-      {
-        id: Date.now(),
-        time: formatTime(),
-        msg: "시스템 초기화 완료.",
-        type: "info",
-      },
-    ],
+    log: [],
     refinePrompt: "",
     ruleSubTab: "global",
-    editingRuleCh: persisted.activeTab,
+    editingRuleCh: defaults.activeTab,
+    channelSaveState: {},
+    referencesEnabled: defaults.referencesEnabled,
+    availableReferences: [],
+    selectedReferenceIds: defaults.selectedReferenceIds,
+    hasHydrated: false,
   };
 }
 
@@ -77,6 +92,25 @@ function reducer(state: ContentState, action: Action): ContentState {
   switch (action.type) {
     case "HYDRATE":
       return { ...state, ...action.payload };
+
+    case "HYDRATE_FROM_STORAGE":
+      return {
+        ...state,
+        draft: action.payload.draft,
+        contentType: action.payload.contentType,
+        goal: action.payload.goal,
+        tone: action.payload.tone,
+        activeTab: action.payload.activeTab,
+        outputs: action.payload.outputs,
+        refinements: action.payload.refinements,
+        globalRules: action.payload.globalRules,
+        channelRules: action.payload.channelRules,
+        channelExtra: action.payload.channelExtra,
+        referencesEnabled: action.payload.referencesEnabled,
+        selectedReferenceIds: action.payload.selectedReferenceIds,
+        editingRuleCh: action.payload.activeTab,
+        hasHydrated: true,
+      };
 
     case "SET_DRAFT":
       return { ...state, draft: action.payload };
@@ -104,6 +138,46 @@ function reducer(state: ContentState, action: Action): ContentState {
 
     case "SET_REFINE_PROMPT":
       return { ...state, refinePrompt: action.payload };
+
+    case "SET_REFERENCES_ENABLED":
+      return { ...state, referencesEnabled: action.payload };
+
+    case "SET_AVAILABLE_REFERENCES": {
+      const validIds = new Set(action.payload.map((x) => x.id));
+      return {
+        ...state,
+        availableReferences: action.payload,
+        selectedReferenceIds: state.selectedReferenceIds.filter((id) =>
+          validIds.has(id)
+        ),
+      };
+    }
+
+    case "TOGGLE_REFERENCE_SELECTION": {
+      const selected = new Set(state.selectedReferenceIds);
+      if (selected.has(action.payload)) {
+        selected.delete(action.payload);
+      } else {
+        selected.add(action.payload);
+      }
+      return { ...state, selectedReferenceIds: Array.from(selected) };
+    }
+
+    case "MARK_CHANNEL_SAVED": {
+      const nextSaveState: ChannelSaveState = {
+        saved: true,
+        isHighPerformance: action.payload.isHighPerformance,
+        savedAt: action.payload.savedAt,
+        contentId: action.payload.contentId,
+      };
+      return {
+        ...state,
+        channelSaveState: {
+          ...state.channelSaveState,
+          [action.payload.channel]: nextSaveState,
+        },
+      };
+    }
 
     case "TOGGLE_GLOBAL_RULE":
       return {
@@ -223,6 +297,10 @@ function reducer(state: ContentState, action: Action): ContentState {
           ...state.outputs,
           [channel]: { content, ts, history },
         },
+        channelSaveState: {
+          ...state.channelSaveState,
+          [channel]: { saved: false, isHighPerformance: false },
+        },
       };
     }
 
@@ -243,6 +321,10 @@ function reducer(state: ContentState, action: Action): ContentState {
             ts: new Date().toLocaleTimeString("ko-KR"),
           },
         },
+        channelSaveState: {
+          ...state.channelSaveState,
+          [channel]: { saved: false, isHighPerformance: false },
+        },
       };
     }
 
@@ -262,6 +344,10 @@ function reducer(state: ContentState, action: Action): ContentState {
             ts: prev.ts,
             history: out.history.slice(0, -1),
           },
+        },
+        channelSaveState: {
+          ...state.channelSaveState,
+          [channel]: { saved: false, isHighPerformance: false },
         },
       };
     }
@@ -291,6 +377,19 @@ export function useContentState() {
   const [state, dispatch] = useReducer(reducer, undefined, createInitialState);
 
   useEffect(() => {
+    const persisted = loadPersistedState();
+    dispatch({ type: "HYDRATE_FROM_STORAGE", payload: persisted });
+    dispatch({
+      type: "ADD_LOG",
+      payload: { msg: "시스템 초기화 완료.", type: "info" },
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!state.hasHydrated) {
+      return;
+    }
+
     savePersistedState({
       draft: state.draft,
       contentType: state.contentType,
@@ -302,8 +401,11 @@ export function useContentState() {
       globalRules: state.globalRules,
       channelRules: state.channelRules,
       channelExtra: state.channelExtra,
+      referencesEnabled: state.referencesEnabled,
+      selectedReferenceIds: state.selectedReferenceIds,
     });
   }, [
+    state.hasHydrated,
     state.draft,
     state.contentType,
     state.goal,
@@ -314,6 +416,8 @@ export function useContentState() {
     state.globalRules,
     state.channelRules,
     state.channelExtra,
+    state.referencesEnabled,
+    state.selectedReferenceIds,
   ]);
 
   const addLog = useCallback((msg: string, type: LogType = "info") => {
@@ -327,5 +431,11 @@ export function useContentState() {
     });
   }, []);
 
-  return { state, dispatch, addLog, resetGlobalRules };
+  return {
+    state,
+    dispatch,
+    addLog,
+    resetGlobalRules,
+    hasHydrated: state.hasHydrated,
+  };
 }

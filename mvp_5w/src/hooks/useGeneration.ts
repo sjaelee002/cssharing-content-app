@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 
 import { buildPrompt } from "@/lib/prompts/build-prompt";
+import { NAVER_BLOG_GUIDE_MARKER } from "@/lib/prompts/channel-guides/naver-blog-guide";
 import { GENERATION_DELAY_MS, MVP_CHANNELS } from "@/lib/prompts/constants";
 import { toPromptContext } from "@/lib/local-storage";
 import type { Channel, ContentState, LogType } from "@/lib/types";
@@ -60,7 +61,9 @@ export function useGeneration({
       const isRefinement = Boolean(extraInstruction?.trim());
       dispatch({ type: "SET_GENERATING", payload: { channel, value: true } });
       addLog(
-        `${channel}${isRefinement ? " 고도화" : ""} 생성 중...`,
+        `${channel}${isRefinement ? " 고도화" : ""} 생성 중${
+          channel === "Blog" ? " (네이버 블로그 지침 적용)" : ""
+        }...`,
         "info"
       );
 
@@ -70,6 +73,9 @@ export function useGeneration({
           toPromptContext(state),
           extraInstruction
         );
+        if (channel === "Blog") {
+          addLog(`Blog 프롬프트에 ${NAVER_BLOG_GUIDE_MARKER} 포함 확인`, "info");
+        }
         const content = await callGenerateApi(prompt, channel);
 
         dispatch({

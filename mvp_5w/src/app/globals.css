@@ -387,6 +387,15 @@ select {
   color: var(--text-sub);
 }
 
+.saved-badge {
+  background: var(--green-bg);
+  color: var(--green);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
 .rollback-btn {
   background: var(--primary-bg);
   color: var(--primary);
@@ -611,8 +620,20 @@ select {
   margin-bottom: 10px;
 }
 
-.refine-textarea {
-  min-height: 150px;
+.naver-guide-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--green);
+  background: var(--green-bg);
+  padding: 6px 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.naver-guide-preview {
+  max-height: 80px;
+  margin-bottom: 12px;
 }
 
 .refinement-history {
@@ -634,6 +655,67 @@ select {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+}
+
+.reference-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.reference-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: var(--text-md);
+}
+
+.reference-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reference-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 8px;
+}
+
+.reference-item input {
+  margin-top: 3px;
+}
+
+.reference-item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.reference-item-meta {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-sub);
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.reference-item-body p {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-md);
+  white-space: pre-wrap;
 }
 
 .log-list {

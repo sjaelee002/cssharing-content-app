@@ -7,6 +7,7 @@ import type { Channel, Goal } from "@/lib/types";
 interface ChannelTabsProps {
   activeTab: Channel;
   goal: Goal;
+  hasHydrated: boolean;
   outputs: Partial<
     Record<
       Channel,
@@ -20,6 +21,7 @@ interface ChannelTabsProps {
 export function ChannelTabs({
   activeTab,
   goal,
+  hasHydrated,
   outputs,
   generating,
   onTabChange,
@@ -32,7 +34,7 @@ export function ChannelTabs({
         const active = activeTab === ch;
         const out = outputs[ch];
         const isGenerating = generating[ch];
-        const hasContent = isValidOutput(out?.content);
+        const hasContent = hasHydrated && isValidOutput(out?.content);
 
         return (
           <button
@@ -43,8 +45,10 @@ export function ChannelTabs({
           >
             <span className="channel-tab-icon">{CH_ICON[ch]}</span>
             <span>{CH_LABELS[ch]}</span>
-            {isGenerating && <span className="status-dot pulse" />}
-            {!isGenerating && hasContent && (
+            {hasHydrated && isGenerating && (
+              <span className="status-dot pulse" />
+            )}
+            {hasHydrated && !isGenerating && hasContent && (
               <span className="status-dot success" />
             )}
           </button>

@@ -12,7 +12,7 @@ export type Tone =
   | "편집적"
   | "친근한";
 
-export type RightPanel = "rules" | "refine" | "log";
+export type RightPanel = "rules" | "refine" | "references" | "log";
 
 export type LogType = "info" | "success" | "error" | "warn";
 
@@ -50,6 +50,26 @@ export interface PromptContext {
   channelRules: Partial<Record<Channel, Rule[]>>;
   channelExtra: Partial<Record<Channel, string>>;
   refinements: Partial<Record<Channel, string[]>>;
+  references?: SavedContentReference[];
+}
+
+export interface SavedContentReference {
+  id: string;
+  channel: Channel;
+  contentType: ContentType | null;
+  goal: Goal | null;
+  tone: Tone | null;
+  draft: string | null;
+  content: string;
+  isHighPerformance: boolean;
+  createdAt: string;
+}
+
+export interface ChannelSaveState {
+  saved: boolean;
+  isHighPerformance: boolean;
+  savedAt?: string;
+  contentId?: string;
 }
 
 export interface ContentState {
@@ -69,6 +89,11 @@ export interface ContentState {
   refinePrompt: string;
   ruleSubTab: "global" | "channel";
   editingRuleCh: Channel;
+  channelSaveState: Partial<Record<Channel, ChannelSaveState>>;
+  referencesEnabled: boolean;
+  availableReferences: SavedContentReference[];
+  selectedReferenceIds: string[];
+  hasHydrated: boolean;
 }
 
 export interface PersistedState {
@@ -82,4 +107,6 @@ export interface PersistedState {
   globalRules: Rule[];
   channelRules: Partial<Record<Channel, Rule[]>>;
   channelExtra: Partial<Record<Channel, string>>;
+  referencesEnabled: boolean;
+  selectedReferenceIds: string[];
 }

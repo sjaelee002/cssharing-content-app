@@ -1,18 +1,25 @@
 "use client";
 
 import { BASE_PROMPTS } from "@/lib/prompts/base-prompts";
+import { buildPrompt } from "@/lib/prompts/build-prompt";
+import {
+  NAVER_BLOG_GUIDE_MARKER,
+  NAVER_BLOG_GUIDE_VERSION,
+} from "@/lib/prompts/channel-guides/naver-blog-guide";
 import { CH_LABELS, MVP_CHANNELS } from "@/lib/prompts/constants";
-import { isValidOutput } from "@/lib/local-storage";
+import { isValidOutput, toPromptContext } from "@/lib/local-storage";
 import type {
   Channel,
   ContentState,
   LogType,
   RightPanel,
   Rule,
+  SavedContentReference,
 } from "@/lib/types";
 
 interface RightPanelProps {
   state: ContentState;
+  hasHydrated: boolean;
   onRightPanelChange: (panel: RightPanel) => void;
   onRuleSubTabChange: (tab: "global" | "channel") => void;
   onEditingRuleChChange: (channel: Channel) => void;
@@ -25,12 +32,20 @@ interface RightPanelProps {
   onChannelExtraChange: (channel: Channel, text: string) => void;
   onRefinePromptChange: (text: string) => void;
   onRefine: () => void;
+  references: SavedContentReference[];
+  referencesEnabled: boolean;
+  selectedReferenceIds: string[];
+  referencesLoading: boolean;
+  onToggleReferencesEnabled: () => void;
+  onToggleReferenceSelection: (id: string) => void;
+  onRefreshReferences: () => void;
   onClearLog: () => void;
 }
 
 const PANEL_TABS: { id: RightPanel; label: string }[] = [
   { id: "rules", label: "규칙" },
   { id: "refine", label: "고도화" },
+  { id: "references", label: "참고자료" },
   { id: "log", label: "로그" },
 ];
 
@@ -94,6 +109,7 @@ function RuleList({
 
 export function RightPanel({
   state,
+  hasHydrated,
   onRightPanelChange,
   onRuleSubTabChange,
   onEditingRuleChChange,
@@ -106,6 +122,13 @@ export function RightPanel({
   onChannelExtraChange,
   onRefinePromptChange,
   onRefine,
+  references,
+  referencesEnabled,
+  selectedReferenceIds,
+  referencesLoading,
+  onToggleReferencesEnabled,
+  onToggleReferenceSelection,
+  onRefreshReferences,
   onClearLog,
 }: RightPanelProps) {
   const activeOutput = state.outputs[state.activeTab];
@@ -251,6 +274,11 @@ export function RightPanel({
                   </option>
                 ))}
               </select>
+              {editingCh === "Blog" && (
+                <p className="naver-guide-badge">
+                  ✅ {NAVER_BLOG_GUIDE_MARKER} 포함 ({NAVER_BLOG_GUIDE_VERSION})
+                </p>
+              )}
               <p className="panel-hint">📌 고정 기본 프롬프트</p>
               <pre className="base-prompt-preview">
                 {(BASE_PROMPTS[editingCh] || "")
@@ -258,6 +286,17 @@ export function RightPanel({
                   .replace(/\{contentType\}/g, "[유형]")
                   .replace(/\{goal\}/g, "[목표]")}
               </pre>
+              {editingCh === "Blog" && hasHydrated && (
+                <>
+                  <p className="panel-hint">🔍 생성 시 주입되는 지침 미리보기</p>
+                  <pre className="base-prompt-preview naver-guide-preview">
+                    {buildPrompt("Blog", toPromptContext(state))
+                      .includes(NAVER_BLOG_GUIDE_MARKER)
+                      ? `${NAVER_BLOG_GUIDE_MARKER} (${NAVER_BLOG_GUIDE_VERSION}) — buildPrompt()에 자동 포함됨`
+                      : "지침 블록 없음"}
+                  </pre>
+                </>
+              )}
               <textarea
                 className="extra-textarea"
                 placeholder="예: SEO 키워드를 자연스럽게 포함"
@@ -277,7 +316,7 @@ export function RightPanel({
               현재 탭({CH_LABELS[state.activeTab]})의 글 + 추가 지시사항으로
               개선된 버전을 생성합니다.
             </p>
-            {isValidOutput(activeOutput?.content) ? (
+            {hasHydrated && isValidOutput(activeOutput?.content) ? (
               <pre className="refine-preview">
                 {activeOutput!.content.substring(0, 200)}
                 {activeOutput!.content.length > 200 ? "..." : ""}
@@ -302,7 +341,7 @@ export function RightPanel({
             <button type="button" className="primary-btn" onClick={onRefine}>
               🚀 고도화 재생성
             </button>
-            {refinements.length > 0 && (
+            {hasHydrated && refinements.length > 0 && (
               <div className="refinement-history">
                 <p className="panel-hint">
                   📚 {CH_LABELS[state.activeTab]} 고도화 기록 (
@@ -342,12 +381,65 @@ export function RightPanel({
             </div>
           </>
         )}
+
+        {state.rightPanel === "references" && (
+          <>
+            <div className="reference-header">
+              <p className="panel-hint">
+                고성과 참고자료 {references.length}개 · 프롬프트 주입{" "}
+                {referencesEnabled ? "ON" : "OFF"}
+              </p>
+              <button
+                type="button"
+                className="ghost-btn small"
+                disabled={referencesLoading}
+                onClick={onRefreshReferences}
+              >
+                {referencesLoading ? "불러오는 중..." : "새로고침"}
+              </button>
+            </div>
+            <div className="reference-toggle-row">
+              <span>고성과 참고자료 프롬프트 반영</span>
+              <Toggle enabled={referencesEnabled} onChange={onToggleReferencesEnabled} />
+            </div>
+            {references.length === 0 ? (
+              <p className="empty-hint">
+                저장된 고성과 참고자료가 없습니다.
+                <br />
+                채널 결과 화면에서 ⭐ 고성과 저장을 먼저 실행하세요.
+              </p>
+            ) : (
+              <div className="reference-list">
+                {references.map((ref) => {
+                  const isSelected = selectedReferenceIds.includes(ref.id);
+                  return (
+                    <label key={ref.id} className="reference-item">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => onToggleReferenceSelection(ref.id)}
+                      />
+                      <div className="reference-item-body">
+                        <div className="reference-item-meta">
+                          <span>{CH_LABELS[ref.channel]}</span>
+                          <span>{new Date(ref.createdAt).toLocaleDateString("ko-KR")}</span>
+                        </div>
+                        <p>{ref.content.slice(0, 120)}...</p>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       <div className="right-footer">
         <span className="status-dot success pulse-slow" />
         <span>
-          출력 {Object.keys(state.outputs).length}개 · {state.goal}
+          출력 {hasHydrated ? Object.keys(state.outputs).length : 0}개 ·{" "}
+          {state.goal}
         </span>
         <span className="footer-meta">{state.contentType}</span>
       </div>

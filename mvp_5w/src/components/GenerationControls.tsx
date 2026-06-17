@@ -5,6 +5,7 @@ import type { Channel, ContentType, Goal, Tone } from "@/lib/types";
 
 interface GenerationControlsProps {
   draft: string;
+  hasHydrated: boolean;
   contentType: ContentType;
   goal: Goal;
   tone: Tone;
@@ -18,6 +19,7 @@ interface GenerationControlsProps {
 
 export function GenerationControls({
   draft,
+  hasHydrated,
   contentType,
   goal,
   tone,
@@ -28,7 +30,7 @@ export function GenerationControls({
   onGenerateAll,
   onGenerateChannel,
 }: GenerationControlsProps) {
-  const hasDraft = draft.trim().length > 0;
+  const hasDraft = hasHydrated && draft.trim().length > 0;
   const isAnyGenerating = MVP_CHANNELS.some((ch) => generating[ch]);
 
   return (

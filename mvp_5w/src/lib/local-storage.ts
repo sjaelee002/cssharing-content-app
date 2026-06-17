@@ -15,6 +15,8 @@ export function getDefaultPersistedState(): PersistedState {
     globalRules: createDefaultGlobalRules(),
     channelRules: {},
     channelExtra: {},
+    referencesEnabled: false,
+    selectedReferenceIds: [],
   };
 }
 
@@ -50,6 +52,12 @@ export function savePersistedState(state: PersistedState): void {
 }
 
 export function toPromptContext(state: ContentState) {
+  const selectedReferences = state.referencesEnabled
+    ? state.availableReferences.filter((r) =>
+        state.selectedReferenceIds.includes(r.id)
+      )
+    : [];
+
   return {
     draft: state.draft,
     contentType: state.contentType,
@@ -59,6 +67,7 @@ export function toPromptContext(state: ContentState) {
     channelRules: state.channelRules,
     channelExtra: state.channelExtra,
     refinements: state.refinements,
+    references: selectedReferences,
   };
 }
 

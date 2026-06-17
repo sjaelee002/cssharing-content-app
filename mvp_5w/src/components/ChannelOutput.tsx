@@ -2,35 +2,44 @@
 
 import { CH_LABELS, GOAL_CHANNELS } from "@/lib/prompts/constants";
 import { isValidOutput } from "@/lib/local-storage";
-import type { Channel, Goal } from "@/lib/types";
+import type { Channel, ChannelSaveState, Goal } from "@/lib/types";
 
 interface ChannelOutputProps {
   channel: Channel;
   goal: Goal;
+  hasHydrated: boolean;
   output?: {
     content: string;
     ts: string;
     history: { content: string; ts: string; instruction?: string }[];
   };
   isGenerating: boolean;
+  isSaving: boolean;
+  saveState?: ChannelSaveState;
   onCopy: (text: string) => void;
   onRegenerate: () => void;
   onRollback: () => void;
+  onSave: (isHighPerformance: boolean) => void;
 }
 
 export function ChannelOutput({
   channel,
   goal,
+  hasHydrated,
   output,
   isGenerating,
+  isSaving,
+  saveState,
   onCopy,
   onRegenerate,
   onRollback,
+  onSave,
 }: ChannelOutputProps) {
   const goalMeta = GOAL_CHANNELS[goal];
-  const hasContent = isValidOutput(output?.content);
-  const isError = output?.content?.startsWith("생성 실패");
-  const historyCount = output?.history.length ?? 0;
+  const hasContent = hasHydrated && isValidOutput(output?.content);
+  const isError =
+    hasHydrated && Boolean(output?.content?.startsWith("생성 실패"));
+  const historyCount = hasHydrated ? (output?.history.length ?? 0) : 0;
 
   return (
     <div className="channel-output">
@@ -42,6 +51,26 @@ export function ChannelOutput({
           </span>
         </div>
         <div className="channel-output-actions">
+          {hasContent && (
+            <>
+              <button
+                type="button"
+                className="ghost-btn"
+                disabled={isSaving}
+                onClick={() => onSave(false)}
+              >
+                {isSaving ? "저장 중..." : "💾 저장"}
+              </button>
+              <button
+                type="button"
+                className="ghost-btn"
+                disabled={isSaving}
+                onClick={() => onSave(true)}
+              >
+                {isSaving ? "저장 중..." : "⭐ 고성과 저장"}
+              </button>
+            </>
+          )}
           {hasContent && (
             <button
               type="button"
@@ -67,10 +96,15 @@ export function ChannelOutput({
           <div className="spinner" />
           <p>{CH_LABELS[channel]} 콘텐츠 생성 중...</p>
         </div>
-      ) : output?.content ? (
+      ) : hasHydrated && output?.content ? (
         <div className={`output-card ${isError ? "error" : ""}`}>
           <div className="output-meta">
             <span>생성됨 · {output.ts}</span>
+            {saveState?.saved && (
+              <span className="saved-badge">
+                {saveState.isHighPerformance ? "⭐ 고성과 저장됨" : "💾 저장됨"}
+              </span>
+            )}
             {historyCount > 0 && (
               <button
                 type="button"

@@ -19,7 +19,10 @@ export function getModelForTask(task: LlmTask = "draft"): string {
 }
 
 export function getMaxTokensForChannel(channel: Channel): number {
-  if (channel === "Blog" || channel === "Magazine") {
+  if (channel === "Blog") {
+    return 5000;
+  }
+  if (channel === "Magazine") {
     return 3000;
   }
   if (channel === "Instagram") {
