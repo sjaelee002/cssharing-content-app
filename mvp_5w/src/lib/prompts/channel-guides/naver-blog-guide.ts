@@ -3,6 +3,11 @@
  * 원본 .shared_cssharing/ 네이버 블로그 지침 샘플을 구조화한 mvp_5w 자산.
  */
 
+import {
+  NO_FAKE_NUMBERS_IMAGE_RULES,
+  NO_FAKE_NUMBERS_RULES,
+} from "@/lib/blog/dataIntegrityRules";
+
 export const NAVER_BLOG_GUIDE_BLOCK_TITLE = "[네이버 블로그 상세 작성 지침]";
 export const NAVER_BLOG_GUIDE_MARKER = NAVER_BLOG_GUIDE_BLOCK_TITLE;
 export const NAVER_BLOG_GUIDE_VERSION = "v4-structured-1.0";
@@ -124,7 +129,7 @@ export const NAVER_BLOG_STRUCTURE_RULES = {
       step: 4,
       name: "결과·사례",
       length: "300~400자",
-      content: "수치 기반 전후 비교 (예: 41%→9%)",
+      content: "초안에 있는 수치만 사용한 전후 비교. 데이터 없으면 정성 표현",
     },
     {
       step: 5,
@@ -167,7 +172,7 @@ export const NAVER_BLOG_HOOK_PATTERNS = {
     },
     {
       name: "수치 충격형",
-      template: "💡 (충격 수치)\n(CS쉐어링 N곳 데이터 근거)",
+      template: "💡 (초안에 있는 수치만 사용)\n(CS쉐어링 데이터 근거가 있을 때만)",
     },
   ],
   forbiddenOpenings: [
@@ -272,7 +277,7 @@ export const NAVER_BLOG_OUTPUT_REQUIREMENTS = {
     { name: "대체 제목", rules: "2~3개 (A키워드+숫자 / B문제 / C방법론)" },
     {
       name: "이미지 삽입 제안",
-      rules: "8~13행 표: 위치|유형|내용|캡션키워드. URL 없음",
+      rules: "8~13행 표: 위치|유형|내용|캡션키워드. URL 없음. 실제 데이터 없으면 line/pie/수치 그래프 금지",
     },
   ],
   template: `제목
@@ -370,6 +375,10 @@ ${e.placement.map((p) => `${p.location}: ${p.emojis} (${p.count})`).join("\n")}
 광고: ${w.adSuspicion.join(", ")}
 ${w.firstPersonReview}
 AI패턴 회피: ${w.aiPatterns.join(" / ")}
+
+${NO_FAKE_NUMBERS_RULES}
+
+${NO_FAKE_NUMBERS_IMAGE_RULES}
 
 ■ 출력 형식: ${o.instruction}
 ${o.sections.map((x) => `- ${x.name}: ${x.rules}`).join("\n")}

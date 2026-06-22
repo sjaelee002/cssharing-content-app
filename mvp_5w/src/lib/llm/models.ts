@@ -1,6 +1,20 @@
 import type { Channel } from "@/lib/types";
 
 export type LlmTask = "draft" | "outline" | "review";
+export type BlogLlmTask = "html" | "visual";
+export type CardnewsLlmTask = "cardnews";
+
+export function getModelForCardnewsTask(): string {
+  const cardnews = process.env.ANTHROPIC_CARDNEWS_MODEL?.trim();
+  if (cardnews) {
+    return cardnews;
+  }
+  const visual = process.env.ANTHROPIC_BLOG_VISUAL_MODEL?.trim();
+  if (visual) {
+    return visual;
+  }
+  return getModelForTask("draft");
+}
 
 export function getModelForTask(task: LlmTask = "draft"): string {
   const map: Record<LlmTask, string | undefined> = {
@@ -16,6 +30,19 @@ export function getModelForTask(task: LlmTask = "draft"): string {
     );
   }
   return model;
+}
+
+export function getModelForBlogTask(task: BlogLlmTask): string {
+  const map: Record<BlogLlmTask, string | undefined> = {
+    html: process.env.ANTHROPIC_BLOG_HTML_MODEL,
+    visual: process.env.ANTHROPIC_BLOG_VISUAL_MODEL,
+  };
+
+  const model = map[task]?.trim();
+  if (model) {
+    return model;
+  }
+  return getModelForTask("draft");
 }
 
 export function getMaxTokensForChannel(channel: Channel): number {

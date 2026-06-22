@@ -14,6 +14,7 @@ interface UseGenerationOptions {
   dispatch: (action: any) => void;
   addLog: (msg: string, type?: LogType) => void;
   onToast?: (msg: string) => void;
+  onBlogGenerated?: (content: string) => void;
 }
 
 async function callGenerateApi(prompt: string, channel: Channel) {
@@ -48,6 +49,7 @@ export function useGeneration({
   dispatch,
   addLog,
   onToast,
+  onBlogGenerated,
 }: UseGenerationOptions) {
   const hasDraft = state.draft.trim().length > 0;
 
@@ -93,6 +95,10 @@ export function useGeneration({
           "success"
         );
 
+        if (channel === "Blog" && !content.startsWith("생성 실패")) {
+          onBlogGenerated?.(content);
+        }
+
         if (isRefinement) {
           onToast?.("✅ 고도화 완료! 다음 생성 시 자동 반영됩니다.");
         }
@@ -112,7 +118,7 @@ export function useGeneration({
         });
       }
     },
-    [addLog, dispatch, hasDraft, onToast, state]
+    [addLog, dispatch, hasDraft, onBlogGenerated, onToast, state]
   );
 
   const generateAll = useCallback(async () => {

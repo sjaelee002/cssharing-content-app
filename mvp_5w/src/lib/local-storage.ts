@@ -1,7 +1,9 @@
 import { createDefaultGlobalRules } from "@/lib/prompts/default-rules";
+import { normalizeBlogEnhancement } from "@/lib/blog/normalizeVisualAssets";
 import type { Channel, ContentState, PersistedState } from "@/lib/types";
 
 const STORAGE_KEY = "cssharing-content-os-v1";
+const APP_STORAGE_PREFIX = "cssharing-";
 
 export function getDefaultPersistedState(): PersistedState {
   return {
@@ -17,6 +19,7 @@ export function getDefaultPersistedState(): PersistedState {
     channelExtra: {},
     referencesEnabled: false,
     selectedReferenceIds: [],
+    blogEnhancement: undefined,
   };
 }
 
@@ -31,12 +34,17 @@ export function loadPersistedState(): PersistedState {
       return getDefaultPersistedState();
     }
     const parsed = JSON.parse(raw) as Partial<PersistedState>;
+    const blogEnhancement = normalizeBlogEnhancement(
+      parsed.blogEnhancement as Record<string, unknown> | undefined
+    ) as PersistedState["blogEnhancement"];
+
     return {
       ...getDefaultPersistedState(),
       ...parsed,
       globalRules: parsed.globalRules?.length
         ? parsed.globalRules
         : createDefaultGlobalRules(),
+      blogEnhancement,
     };
   } catch {
     return getDefaultPersistedState();
@@ -49,6 +57,24 @@ export function savePersistedState(state: PersistedState): void {
   }
 
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+/** 앱 관련 localStorage 키를 모두 제거합니다. */
+export function clearAllAppLocalStorage(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const keysToRemove: string[] = [];
+  for (let i = 0; i < window.localStorage.length; i++) {
+    const key = window.localStorage.key(i);
+    if (key?.startsWith(APP_STORAGE_PREFIX)) {
+      keysToRemove.push(key);
+    }
+  }
+  for (const key of keysToRemove) {
+    window.localStorage.removeItem(key);
+  }
 }
 
 export function toPromptContext(state: ContentState) {

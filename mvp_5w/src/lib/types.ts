@@ -1,3 +1,6 @@
+import type { BlogEnhancementState } from "@/lib/blog/types";
+import type { InstagramCardnewsState } from "@/lib/instagram/types";
+
 export type Channel = "Blog" | "Magazine" | "Instagram" | "Facebook" | "LinkedIn";
 
 export type ContentType = "인사이트" | "사례연구" | "광고" | "트렌드";
@@ -72,6 +75,16 @@ export interface ChannelSaveState {
   contentId?: string;
 }
 
+export type {
+  BlogEnhancementState,
+  BlogParsed,
+  GeneratedVisual,
+  VisualOutputMode,
+  VisualType,
+} from "@/lib/blog/types";
+
+export type { InstagramCardnewsState } from "@/lib/instagram/types";
+
 export interface ContentState {
   draft: string;
   contentType: ContentType;
@@ -94,6 +107,14 @@ export interface ContentState {
   availableReferences: SavedContentReference[];
   selectedReferenceIds: string[];
   hasHydrated: boolean;
+  blogEnhancement: BlogEnhancementState;
+  instagramCardnews: InstagramCardnewsState;
+}
+
+export interface PersistedBlogEnhancement {
+  blogContentRaw: string;
+  blogContentHtml: string;
+  blogParsed: BlogEnhancementState["blogParsed"];
 }
 
 export interface PersistedState {
@@ -109,4 +130,9 @@ export interface PersistedState {
   channelExtra: Partial<Record<Channel, string>>;
   referencesEnabled: boolean;
   selectedReferenceIds: string[];
+  blogEnhancement?: PersistedBlogEnhancement;
+  instagramCardnews?: Omit<
+    import("@/lib/instagram/types").InstagramCardnewsState,
+    "generating" | "error"
+  >;
 }

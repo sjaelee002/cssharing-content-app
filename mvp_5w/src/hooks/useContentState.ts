@@ -3,13 +3,18 @@
 import { useCallback, useEffect, useReducer } from "react";
 
 import { createDefaultGlobalRules } from "@/lib/prompts/default-rules";
+import { createEmptyBlogEnhancement } from "@/lib/blog/types";
+import { createEmptyInstagramCardnews } from "@/lib/instagram/types";
+import { normalizeBlogEnhancement, normalizeVisualAssets } from "@/lib/blog/normalizeVisualAssets";
 import {
+  clearAllAppLocalStorage,
   formatTime,
   getDefaultPersistedState,
   loadPersistedState,
   savePersistedState,
 } from "@/lib/local-storage";
 import type {
+  BlogEnhancementState,
   Channel,
   ChannelSaveState,
   ContentState,
@@ -68,7 +73,14 @@ type Action =
   | { type: "SET_OUTPUT_ERROR"; payload: { channel: Channel; message: string } }
   | { type: "ROLLBACK_OUTPUT"; payload: Channel }
   | { type: "ADD_LOG"; payload: { msg: string; type?: LogType } }
-  | { type: "CLEAR_LOG" };
+  | { type: "CLEAR_LOG" }
+  | { type: "SET_BLOG_ENHANCEMENT"; payload: Partial<BlogEnhancementState> }
+  | { type: "RESET_BLOG_ENHANCEMENT" }
+  | { type: "RESET_WORK" }
+  | {
+      type: "SET_INSTAGRAM_CARDNEWS";
+      payload: Partial<import("@/lib/instagram/types").InstagramCardnewsState>;
+    };
 
 function createInitialState(): ContentState {
   const defaults = getDefaultPersistedState();
@@ -85,6 +97,8 @@ function createInitialState(): ContentState {
     availableReferences: [],
     selectedReferenceIds: defaults.selectedReferenceIds,
     hasHydrated: false,
+    blogEnhancement: createEmptyBlogEnhancement(),
+    instagramCardnews: createEmptyInstagramCardnews(),
   };
 }
 
@@ -109,6 +123,26 @@ function reducer(state: ContentState, action: Action): ContentState {
         referencesEnabled: action.payload.referencesEnabled,
         selectedReferenceIds: action.payload.selectedReferenceIds,
         editingRuleCh: action.payload.activeTab,
+        blogEnhancement: action.payload.blogEnhancement
+          ? ({
+              ...createEmptyBlogEnhancement(),
+              ...normalizeBlogEnhancement(
+                action.payload.blogEnhancement as unknown as Record<
+                  string,
+                  unknown
+                >
+              ),
+              htmlFormatting: false,
+              visualGenerating: false,
+            } as BlogEnhancementState)
+          : createEmptyBlogEnhancement(),
+        instagramCardnews: action.payload.instagramCardnews
+          ? {
+              ...createEmptyInstagramCardnews(),
+              ...action.payload.instagramCardnews,
+              generating: false,
+            }
+          : createEmptyInstagramCardnews(),
         hasHydrated: true,
       };
 
@@ -301,6 +335,9 @@ function reducer(state: ContentState, action: Action): ContentState {
           ...state.channelSaveState,
           [channel]: { saved: false, isHighPerformance: false },
         },
+        ...(channel === "Blog"
+          ? { blogEnhancement: createEmptyBlogEnhancement() }
+          : {}),
       };
     }
 
@@ -325,6 +362,9 @@ function reducer(state: ContentState, action: Action): ContentState {
           ...state.channelSaveState,
           [channel]: { saved: false, isHighPerformance: false },
         },
+        ...(channel === "Blog"
+          ? { blogEnhancement: createEmptyBlogEnhancement() }
+          : {}),
       };
     }
 
@@ -349,6 +389,9 @@ function reducer(state: ContentState, action: Action): ContentState {
           ...state.channelSaveState,
           [channel]: { saved: false, isHighPerformance: false },
         },
+        ...(channel === "Blog"
+          ? { blogEnhancement: createEmptyBlogEnhancement() }
+          : {}),
       };
     }
 
@@ -367,6 +410,44 @@ function reducer(state: ContentState, action: Action): ContentState {
 
     case "CLEAR_LOG":
       return { ...state, log: [] };
+
+    case "SET_BLOG_ENHANCEMENT": {
+      const nextPayload = { ...action.payload };
+      if (nextPayload.visualAssets !== undefined) {
+        nextPayload.visualAssets = normalizeVisualAssets(
+          nextPayload.visualAssets,
+          nextPayload.visualOutputMode ?? state.blogEnhancement.visualOutputMode
+        );
+      }
+      return {
+        ...state,
+        blogEnhancement: {
+          ...state.blogEnhancement,
+          ...nextPayload,
+        },
+      };
+    }
+
+    case "RESET_BLOG_ENHANCEMENT":
+      return {
+        ...state,
+        blogEnhancement: createEmptyBlogEnhancement(),
+      };
+
+    case "RESET_WORK":
+      return {
+        ...createInitialState(),
+        hasHydrated: true,
+      };
+
+    case "SET_INSTAGRAM_CARDNEWS":
+      return {
+        ...state,
+        instagramCardnews: {
+          ...state.instagramCardnews,
+          ...action.payload,
+        },
+      };
 
     default:
       return state;
@@ -403,6 +484,19 @@ export function useContentState() {
       channelExtra: state.channelExtra,
       referencesEnabled: state.referencesEnabled,
       selectedReferenceIds: state.selectedReferenceIds,
+      blogEnhancement: {
+        blogContentRaw: state.blogEnhancement.blogContentRaw,
+        blogContentHtml: state.blogEnhancement.blogContentHtml,
+        blogParsed: state.blogEnhancement.blogParsed,
+      },
+      instagramCardnews: {
+        storyboard: state.instagramCardnews.storyboard,
+        cardnewsHtml: state.instagramCardnews.cardnewsHtml,
+        caption: state.instagramCardnews.caption,
+        hashtags: state.instagramCardnews.hashtags,
+        selfReview: state.instagramCardnews.selfReview,
+        model: state.instagramCardnews.model,
+      },
     });
   }, [
     state.hasHydrated,
@@ -418,6 +512,15 @@ export function useContentState() {
     state.channelExtra,
     state.referencesEnabled,
     state.selectedReferenceIds,
+    state.blogEnhancement.blogContentRaw,
+    state.blogEnhancement.blogContentHtml,
+    state.blogEnhancement.blogParsed,
+    state.instagramCardnews.storyboard,
+    state.instagramCardnews.cardnewsHtml,
+    state.instagramCardnews.caption,
+    state.instagramCardnews.hashtags,
+    state.instagramCardnews.selfReview,
+    state.instagramCardnews.model,
   ]);
 
   const addLog = useCallback((msg: string, type: LogType = "info") => {
@@ -431,11 +534,21 @@ export function useContentState() {
     });
   }, []);
 
+  const resetWork = useCallback(() => {
+    clearAllAppLocalStorage();
+    dispatch({ type: "RESET_WORK" });
+    dispatch({
+      type: "ADD_LOG",
+      payload: { msg: "작업이 초기화되었습니다.", type: "info" },
+    });
+  }, []);
+
   return {
     state,
     dispatch,
     addLog,
     resetGlobalRules,
+    resetWork,
     hasHydrated: state.hasHydrated,
   };
 }

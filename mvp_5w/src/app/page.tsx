@@ -1,14 +1,18 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { AccessGate } from "@/components/AccessGate";
+import { BlogOutputPanel } from "@/components/blog/BlogOutputPanel";
+import { InstagramOutputPanel } from "@/components/instagram/InstagramOutputPanel";
 import { ChannelOutput } from "@/components/ChannelOutput";
 import { ChannelTabs } from "@/components/ChannelTabs";
 import { DraftPanel } from "@/components/DraftPanel";
 import { GenerationControls } from "@/components/GenerationControls";
 import { RightPanel } from "@/components/RightPanel";
 import { useContentState } from "@/hooks/useContentState";
+import { useBlogEnhancement } from "@/hooks/useBlogEnhancement";
+import { useInstagramCardnews } from "@/hooks/useInstagramCardnews";
 import { useGeneration } from "@/hooks/useGeneration";
 import type {
   Channel,
@@ -43,7 +47,7 @@ export default function HomePage() {
 }
 
 function ContentOsApp() {
-  const { state, dispatch, addLog, hasHydrated } = useContentState();
+  const { state, dispatch, addLog, hasHydrated, resetWork } = useContentState();
   const [toast, setToast] = useState<string | null>(null);
   const [savingChannels, setSavingChannels] = useState<Partial<Record<Channel, boolean>>>({});
   const [referencesLoading, setReferencesLoading] = useState(false);
@@ -53,11 +57,24 @@ function ContentOsApp() {
     window.setTimeout(() => setToast(null), 2800);
   }, []);
 
+  const { processBlogContent } = useBlogEnhancement({
+      dispatch,
+      addLog,
+      onToast: showToast,
+    });
+
+  const { generateCardnews } = useInstagramCardnews({
+    dispatch,
+    addLog,
+    onToast: showToast,
+  });
+
   const { generateChannel, generateAll, refineActiveChannel } = useGeneration({
     state,
     dispatch,
     addLog,
     onToast: showToast,
+    onBlogGenerated: processBlogContent,
   });
 
   const handleCopy = useCallback(
@@ -71,6 +88,61 @@ function ContentOsApp() {
     },
     [showToast]
   );
+
+  const handleCopyHtml = useCallback(
+    async (html: string) => {
+      try {
+        const blob = new Blob([html], { type: "text/html" });
+        const plainBlob = new Blob(
+          [html.replace(/<[^>]+>/g, "")],
+          { type: "text/plain" }
+        );
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            "text/html": blob,
+            "text/plain": plainBlob,
+          }),
+        ]);
+        showToast("📋 HTML 서식 포함 복사되었습니다!");
+      } catch {
+        try {
+          await navigator.clipboard.writeText(html);
+          showToast("📋 HTML 복사되었습니다!");
+        } catch {
+          showToast("⚠️ 복사 실패");
+        }
+      }
+    },
+    [showToast]
+  );
+
+  const handleBlogRollback = useCallback(() => {
+    const out = state.outputs.Blog;
+    if (!out?.history.length) {
+      return;
+    }
+    const prev = out.history[out.history.length - 1];
+    dispatch({ type: "ROLLBACK_OUTPUT", payload: "Blog" });
+    void processBlogContent(prev.content);
+  }, [dispatch, processBlogContent, state.outputs.Blog]);
+
+  useEffect(() => {
+    if (!hasHydrated) {
+      return;
+    }
+    const blogOutput = state.outputs.Blog?.content;
+    if (!blogOutput || blogOutput.startsWith("생성 실패")) {
+      return;
+    }
+    if (
+      state.blogEnhancement.blogContentRaw === blogOutput &&
+      state.blogEnhancement.blogContentHtml
+    ) {
+      return;
+    }
+    void processBlogContent(blogOutput);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasHydrated]);
 
   const refreshReferences = useCallback(async () => {
     setReferencesLoading(true);
@@ -188,6 +260,7 @@ function ContentOsApp() {
             onDraftChange={(value) =>
               dispatch({ type: "SET_DRAFT", payload: value })
             }
+            onResetWork={resetWork}
           />
           <GenerationControls
             draft={state.draft}
@@ -223,23 +296,68 @@ function ContentOsApp() {
           }
         />
         <div className="center-body">
-          <ChannelOutput
-            channel={state.activeTab}
-            goal={state.goal}
-            hasHydrated={hasHydrated}
-            output={state.outputs[state.activeTab]}
-            isGenerating={Boolean(state.generating[state.activeTab])}
-            isSaving={Boolean(savingChannels[state.activeTab])}
-            saveState={state.channelSaveState[state.activeTab]}
-            onCopy={handleCopy}
-            onRegenerate={() => generateChannel(state.activeTab)}
-            onRollback={() =>
-              dispatch({ type: "ROLLBACK_OUTPUT", payload: state.activeTab })
-            }
-            onSave={(isHighPerformance) =>
-              handleSaveChannel(state.activeTab, isHighPerformance)
-            }
-          />
+          {state.activeTab === "Blog" ? (
+            <BlogOutputPanel
+              goal={state.goal}
+              hasHydrated={hasHydrated}
+              output={state.outputs.Blog}
+              blogEnhancement={state.blogEnhancement}
+              isGenerating={Boolean(state.generating.Blog)}
+              isSaving={Boolean(savingChannels.Blog)}
+              saveState={state.channelSaveState.Blog}
+              onCopyText={handleCopy}
+              onCopyHtml={handleCopyHtml}
+              onRegenerate={() => generateChannel("Blog")}
+              onRollback={handleBlogRollback}
+              onSave={(isHighPerformance) =>
+                handleSaveChannel("Blog", isHighPerformance)
+              }
+            />
+          ) : state.activeTab === "Instagram" ? (
+            <InstagramOutputPanel
+              goal={state.goal}
+              hasHydrated={hasHydrated}
+              output={state.outputs.Instagram}
+              blogEnhancement={state.blogEnhancement}
+              cardnews={state.instagramCardnews}
+              isGenerating={Boolean(state.generating.Instagram)}
+              isSaving={Boolean(savingChannels.Instagram)}
+              saveState={state.channelSaveState.Instagram}
+              onCopy={handleCopy}
+              onRegenerate={() => generateChannel("Instagram")}
+              onRollback={() =>
+                dispatch({ type: "ROLLBACK_OUTPUT", payload: "Instagram" })
+              }
+              onSave={(isHighPerformance) =>
+                handleSaveChannel("Instagram", isHighPerformance)
+              }
+              onGenerateCardnews={() =>
+                generateCardnews(
+                  state.blogEnhancement,
+                  state.outputs.Instagram?.content,
+                  state.tone
+                )
+              }
+            />
+          ) : (
+            <ChannelOutput
+              channel={state.activeTab}
+              goal={state.goal}
+              hasHydrated={hasHydrated}
+              output={state.outputs[state.activeTab]}
+              isGenerating={Boolean(state.generating[state.activeTab])}
+              isSaving={Boolean(savingChannels[state.activeTab])}
+              saveState={state.channelSaveState[state.activeTab]}
+              onCopy={handleCopy}
+              onRegenerate={() => generateChannel(state.activeTab)}
+              onRollback={() =>
+                dispatch({ type: "ROLLBACK_OUTPUT", payload: state.activeTab })
+              }
+              onSave={(isHighPerformance) =>
+                handleSaveChannel(state.activeTab, isHighPerformance)
+              }
+            />
+          )}
         </div>
       </main>
 
