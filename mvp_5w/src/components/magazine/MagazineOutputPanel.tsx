@@ -254,6 +254,12 @@ export function MagazineOutputPanel({
               )}
             </section>
 
+            {magazineEnhancement.rawLengthWarning && (
+              <p className="magazine-raw-warning" role="status">
+                ⚠️ {magazineEnhancement.rawLengthWarning}
+              </p>
+            )}
+
             {magazineEnhancement.magazineContentRaw && (
               <>
                 <p className="magazine-save-info">

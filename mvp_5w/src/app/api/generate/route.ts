@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { generateWithAnthropic } from "@/lib/llm/anthropic";
+import { getMaxTokensForChannel } from "@/lib/llm/models";
+import { MAGAZINE_LENGTH_TARGET } from "@/lib/magazine/validateMagazineRaw";
+import { logMagazinePipeline } from "@/lib/magazine/magazineDebug";
 import { MVP_CHANNELS } from "@/lib/prompts/constants";
 import type { Channel } from "@/lib/types";
 
@@ -42,13 +45,34 @@ export async function POST(request: Request) {
       );
     }
 
+    const maxTokens = getMaxTokensForChannel(channel);
     const result = await generateWithAnthropic(prompt, channel);
+
+    if (channel === "Magazine") {
+      logMagazinePipeline({
+        stage: "api-generate",
+        channel,
+        promptLength: prompt.length,
+        hasLengthTargetInPrompt: prompt.includes(MAGAZINE_LENGTH_TARGET),
+        maxTokens,
+        stopReason: result.stopReason,
+        llmOutputLength: result.content.length,
+      });
+    }
 
     return NextResponse.json({
       content: result.content,
       model: result.model,
       channel,
       provider: "anthropic",
+      meta:
+        channel === "Magazine"
+          ? {
+              stopReason: result.stopReason,
+              maxTokens,
+              outputLength: result.content.length,
+            }
+          : undefined,
     });
   } catch (error) {
     const message =

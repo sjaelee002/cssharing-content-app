@@ -101,16 +101,31 @@ export function parseMagazineContent(raw: string): MagazineParsed {
     extractSectionContent(lines, "헤드라인", ["본문", "리드", "기사 본문"]) ||
     extractSectionContent(lines, "매거진 제목", ["본문", "리드", "기사 본문"]);
 
-  const bodyFromSection =
+  const bodyFromMainSection =
     extractSectionContent(lines, "본문", []) ||
-    extractSectionContent(lines, "기사 본문", []) ||
-    extractSectionContent(lines, "리드", ["본문", "기사 본문"]);
+    extractSectionContent(lines, "기사 본문", []);
 
-  const title = titleFromSection.split("\n")[0]?.trim() || inferTitleFromFirstLine(raw);
-  const bodyText = bodyFromSection || inferBodyWithoutTitle(raw, title);
+  const bodyFromLead = extractSectionContent(lines, "리드", [
+    "본문",
+    "기사 본문",
+  ]);
+
+  const title =
+    titleFromSection.split("\n")[0]?.trim() || inferTitleFromFirstLine(raw);
+  const inferredBody = inferBodyWithoutTitle(raw, title);
+
+  const bodyCandidates = [bodyFromMainSection, bodyFromLead, inferredBody].filter(
+    (value) => value.trim().length > 0
+  );
+
+  const bodyText = bodyCandidates.reduce(
+    (longest, current) =>
+      current.length > longest.length ? current : longest,
+    ""
+  );
 
   return {
     title,
-    bodyText,
+    bodyText: bodyText || raw.trim(),
   };
 }

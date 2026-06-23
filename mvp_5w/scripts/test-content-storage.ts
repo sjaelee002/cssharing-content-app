@@ -95,6 +95,54 @@ const magForSave = getMagazineContentForStorage(
 );
 assert(magForSave === magStorage, "magazine save uses raw");
 
+const truncatedInput = `제목
+테스트 제목
+
+피처 섹션 본문입니다. 성수기 콜센터 운영에서 응대 공백이 문제가 됩니다. 이 문단은 본문 마커 앞에 있어야 합니다.
+
+본문
+짧은 꼬리만 남는 경우
+
+🔎 자주 묻는 질문
+질문입니다?
+답변입니다.
+
+📌 오늘의 핵심 3가지
+1. 핵심 1
+2. 핵심 2
+3. 핵심 3`;
+
+const truncatedParsed = parseMagazineContent(truncatedInput);
+assert(
+  truncatedParsed.bodyText.includes("피처 섹션 본문입니다"),
+  "parse keeps content before late 본문 marker"
+);
+assert(
+  truncatedParsed.bodyText.includes("자주 묻는 질문"),
+  "parse keeps FAQ section"
+);
+
+const emojiMissingInput = `제목
+테스트
+
+본문
+성수기 운영 안내입니다.
+
+자주 묻는 질문
+언제 도입하나요?
+성수기 전에 검토하세요.
+
+오늘의 핵심 3가지
+1. 선제 대응
+2. 비용 최적화
+3. 전문 인력`;
+
+const emojiFixed = sanitizeMagazineRaw(parseMagazineContent(emojiMissingInput));
+assert(emojiFixed.includes("🔎 자주 묻는 질문"), "emoji defaults add FAQ heading");
+assert(emojiFixed.includes("📌 오늘의 핵심 3가지"), "emoji defaults add key heading");
+assert(emojiFixed.includes("1️⃣"), "emoji defaults add numbered key items");
+assert(emojiFixed.includes("✅"), "emoji defaults add FAQ check");
+
 console.log("✓ Blog storage sample:\n", storage.slice(0, 120), "...");
 console.log("✓ Magazine source (emoji stripped):\n", magazineSource?.body.slice(0, 100), "...");
 console.log("✓ Magazine storage sample:\n", magForSave.slice(0, 160), "...");

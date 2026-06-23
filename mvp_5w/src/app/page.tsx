@@ -90,8 +90,11 @@ function ContentOsApp() {
     addLog,
     onToast: showToast,
     onBlogGenerated: processBlogContent,
-    onMagazineGenerated: (content) =>
-      processMagazineContent(content, state.blogEnhancement),
+    onMagazineGenerated: (content, blogParsed) =>
+      processMagazineContent(
+        content,
+        blogParsed ?? state.blogEnhancement.blogParsed
+      ),
   });
 
   const handleCopy = useCallback(
@@ -150,8 +153,8 @@ function ContentOsApp() {
     }
     const prev = out.history[out.history.length - 1];
     dispatch({ type: "ROLLBACK_OUTPUT", payload: "Magazine" });
-    void processMagazineContent(prev.content, state.blogEnhancement);
-  }, [dispatch, processMagazineContent, state.blogEnhancement, state.outputs.Magazine]);
+    void processMagazineContent(prev.content, state.blogEnhancement.blogParsed);
+  }, [dispatch, processMagazineContent, state.blogEnhancement.blogParsed, state.outputs.Magazine]);
 
   useEffect(() => {
     if (!hasHydrated) {
@@ -185,7 +188,7 @@ function ContentOsApp() {
     ) {
       return;
     }
-    void processMagazineContent(magazineOutput, state.blogEnhancement);
+    void processMagazineContent(magazineOutput, state.blogEnhancement.blogParsed);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasHydrated]);
 

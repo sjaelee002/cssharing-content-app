@@ -20,7 +20,7 @@ function getApiKey(): string {
 export async function generateWithAnthropic(
   prompt: string,
   channel: Channel
-): Promise<{ content: string; model: string }> {
+): Promise<{ content: string; model: string; stopReason: string | null }> {
   return generateWithAnthropicRaw(prompt, {
     maxTokens: getMaxTokensForChannel(channel),
   });
@@ -34,13 +34,14 @@ export async function generateWithAnthropicRaw(
     task?: "draft" | "outline" | "review";
     model?: string;
   }
-): Promise<{ content: string; model: string }> {
+): Promise<{ content: string; model: string; stopReason: string | null }> {
   const model = options?.model ?? getModelForTask(options?.task ?? "draft");
   const client = new Anthropic({ apiKey: getApiKey() });
+  const maxTokens = options?.maxTokens ?? 4000;
 
   const response = await client.messages.create({
     model,
-    max_tokens: options?.maxTokens ?? 4000,
+    max_tokens: maxTokens,
     temperature: options?.temperature ?? 0.7,
     messages: [{ role: "user", content: prompt }],
   });
@@ -50,7 +51,11 @@ export async function generateWithAnthropicRaw(
     throw new Error("모델이 텍스트 응답을 반환하지 않았습니다.");
   }
 
-  return { content: textBlock.text, model };
+  return {
+    content: textBlock.text,
+    model,
+    stopReason: response.stop_reason ?? null,
+  };
 }
 
 /** 카드뉴스 designer mode — Opus adaptive thinking 지원 시 적용 */

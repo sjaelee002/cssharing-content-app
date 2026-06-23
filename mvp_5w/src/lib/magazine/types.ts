@@ -8,6 +8,7 @@ export interface MagazineEnhancementState {
   magazineContentHtml: string;
   magazineParsed: MagazineParsed | null;
   htmlFormatting: boolean;
+  rawLengthWarning?: string;
 }
 
 export function createEmptyMagazineEnhancement(): MagazineEnhancementState {
@@ -16,5 +17,6 @@ export function createEmptyMagazineEnhancement(): MagazineEnhancementState {
     magazineContentHtml: "",
     magazineParsed: null,
     htmlFormatting: false,
+    rawLengthWarning: "",
   };
 }

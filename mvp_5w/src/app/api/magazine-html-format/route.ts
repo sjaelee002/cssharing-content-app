@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import type { BlogImageSuggestion } from "@/lib/blog/types";
 import { formatMagazineHtml } from "@/lib/magazine/formatMagazineHtml";
+import { logMagazinePipeline } from "@/lib/magazine/magazineDebug";
 import { generateWithAnthropicRaw } from "@/lib/llm/anthropic";
 import { getMagazineHtmlMaxTokens, getModelForBlogTask } from "@/lib/llm/models";
 import {
@@ -49,6 +50,14 @@ export async function POST(request: Request) {
 
     const rawHtml = stripHtmlFences(result.content);
     const html = formatMagazineHtml(rawHtml, visualSuggestions || []);
+
+    logMagazinePipeline({
+      stage: "api-html-format",
+      maxTokens,
+      stopReason: result.stopReason,
+      htmlInputLength: rawText.length,
+      htmlOutputLength: html.length,
+    });
 
     return NextResponse.json({
       html,

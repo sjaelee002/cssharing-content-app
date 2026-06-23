@@ -609,6 +609,17 @@ select {
   line-height: 1.5;
 }
 
+.magazine-raw-warning {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  color: #9a3412;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .social-output-panel .social-body {
   white-space: pre-wrap;
 }
