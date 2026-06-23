@@ -1,5 +1,6 @@
 import type { BlogEnhancementState } from "@/lib/blog/types";
 import type { InstagramCardnewsState } from "@/lib/instagram/types";
+import type { MagazineEnhancementState } from "@/lib/magazine/types";
 
 export type Channel = "Blog" | "Magazine" | "Instagram" | "Facebook" | "LinkedIn";
 
@@ -83,6 +84,11 @@ export type {
   VisualType,
 } from "@/lib/blog/types";
 
+export type {
+  MagazineEnhancementState,
+  MagazineParsed,
+} from "@/lib/magazine/types";
+
 export type { InstagramCardnewsState } from "@/lib/instagram/types";
 
 export interface ContentState {
@@ -108,6 +114,7 @@ export interface ContentState {
   selectedReferenceIds: string[];
   hasHydrated: boolean;
   blogEnhancement: BlogEnhancementState;
+  magazineEnhancement: MagazineEnhancementState;
   instagramCardnews: InstagramCardnewsState;
 }
 
@@ -115,6 +122,12 @@ export interface PersistedBlogEnhancement {
   blogContentRaw: string;
   blogContentHtml: string;
   blogParsed: BlogEnhancementState["blogParsed"];
+}
+
+export interface PersistedMagazineEnhancement {
+  magazineContentRaw: string;
+  magazineContentHtml: string;
+  magazineParsed: MagazineEnhancementState["magazineParsed"];
 }
 
 export interface PersistedState {
@@ -131,6 +144,7 @@ export interface PersistedState {
   referencesEnabled: boolean;
   selectedReferenceIds: string[];
   blogEnhancement?: PersistedBlogEnhancement;
+  magazineEnhancement?: PersistedMagazineEnhancement;
   instagramCardnews?: Omit<
     import("@/lib/instagram/types").InstagramCardnewsState,
     "generating" | "error"

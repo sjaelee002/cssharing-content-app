@@ -1,54 +1,86 @@
-# 콘텐츠 운영 OS — MVP (Step 1~4 + Step 6)
+# CS쉐어링 콘텐츠 운영 OS — MVP
 
-Next.js 기반 콘텐츠 운영 OS MVP입니다. 기존 Google Apps Script `콘텐츠 만능이`의 **두뇌**(프롬프트·조립 로직)를 이식하여, 업그레이드된 웹앱으로 재구축했습니다.
+Next.js 기반 **B2B 콘텐츠 생성 자동화** 웹앱입니다. 사용자 초안을 입력하면 **5개 채널**(네이버 블로그, 홈페이지 매거진, Instagram, Facebook, LinkedIn) 원고를 생성하고, HTML 미리보기·복사·Supabase 저장까지 한 화면에서 처리합니다.
 
-## 현재 구현 범위
+**Blog가 master source**입니다. Magazine과 소셜 채널은 Blog clean content(제목+본문)를 기반으로 파생 생성됩니다.
 
-`제품_사용설명서_콘텐츠운영OS.md`의 **## 3. 사용 순서 (제품의 핵심 흐름)** 기준 **Step 1~4 + Step 6(MVP)**가 구현되어 있습니다.
+---
 
+## 주요 기능
 
-| Step   | 기능                        | 상태                          |
-| ------ | ------------------------- | --------------------------- |
-| Step 1 | 초안 입력                     | ✅                           |
-| Step 2 | 유형·목표·톤 선택                | ✅                           |
-| Step 3 | 전체 채널 생성 (5채널 순차)         | ✅                           |
-| Step 4 | 채널별 확인·복사·재생성·고도화·버전 되돌리기 | ✅                           |
-| Step 5 | 카드뉴스 (Canva)              | 🔜 1차 배포 후 확장               |
-| Step 6 | 저장 & 글감 누적 (Supabase)     | ✅                           |
-| Step 7 | 발행                        | 🔜 1차 배포 후 확장 (MVP: 사람이 복사) |
+| 기능 | 설명 |
+|------|------|
+| 네이버 블로그 생성 | 상세 지침 + HTML 미리보기 + 복사 |
+| Blog clean 저장 | Supabase에 제목+본문만 저장 (태그·자기점검 제외) |
+| 홈페이지 매거진 | raw(저장) / HTML(미리보기) 분리 |
+| Magazine HTML 미리보기 | FAQ·핵심·표·placeholder 후처리 |
+| Magazine 복사·다운로드 | HTML 서식 포함 복사 / HTML·CSS 코드 복사 / `.html` 다운로드 |
+| Instagram / Facebook / LinkedIn | Blog 기반 재작성, UI 단순 표시 |
+| 소셜 clean 저장 | emoji·해시태그·Markdown·채널 라벨 제거 후 저장 |
+| Supabase 저장 | 채널별 clean text + ⭐ 고성과 저장 |
+| 참고자료 재활용 | 고성과 글 RAG 참조 |
+| 내 작업 초기화 | localStorage 초기화 (Supabase 데이터는 유지) |
+| 접근 비밀번호 | 1차 팀 내부 테스트용 임시 게이트 |
 
+---
 
-### MVP 5채널
+## MVP 범위 (현재)
 
-- `Blog` — 네이버 블로그 (HTML 미리보기·복사·태그·대체 제목 포함)
-- `Magazine` — 홈페이지 매거진
-- `Instagram` — 인스타그램
-- `Facebook` — 페이스북
-- `LinkedIn` — 링크드인
+**포함**
 
-### 네이버 블로그 탭 (MVP 포함)
+- 5채널 원고 생성 + HTML 미리보기/복사/저장
+- Blog → Magazine → 소셜 파생 생성 파이프라인
+- Magazine table/FAQ/핵심/placeholder 후처리
 
-- 채택 제목, HTML 미리보기, 추천 태그, 대체 제목
-- HTML 서식 포함 복사 / 블로그 텍스트 복사 / 순수 본문 복사
-- 시각화 자료 삽입 제안 (텍스트 참고용)
-- 원문 보기 / 자기점검 보기 (접힘 UI)
-- Supabase 저장 시 **raw 원문** 저장 (HTML preview·visual markup 미포함)
+**후속 단계 (이번 MVP 제외)**
 
-### 1차 배포에서 숨긴 실험 기능
+- 카드뉴스 / Canva 연동
+- 이미지 AI / PDF·PPTX export
+- 자동 발행, 정식 로그인, 성과 대시보드
 
-아래 기능은 코드베이스에 남아 있을 수 있으나 **MVP 기본 UI에서는 노출되지 않습니다.**
+실험 코드(블로그 시각화 자동 생성, 인스타 카드뉴스)는 feature flag로 숨겨져 있으며 기본 배포에 포함하지 않습니다.
 
-- 블로그 시각화 자료 자동 생성 (SVG/HTML-CSS)
-- 인스타 카드뉴스 HTML/CSS 생성 패널
+---
 
-재활성화 시 환경변수:
+## 콘텐츠 생성 파이프라인
 
-```env
-NEXT_PUBLIC_ENABLE_BLOG_VISUAL_GENERATOR=true
-NEXT_PUBLIC_ENABLE_INSTAGRAM_CARDNEWS=true
+```mermaid
+flowchart TD
+  A[사용자 초안] --> B[Blog LLM 생성]
+  B --> C[parseBlogContent]
+  C --> D[Blog UI: 전체 출력]
+  C --> E[getBlogContentForStorage]
+  E --> F[(Supabase Blog clean)]
+
+  C --> G[getBlogSourceForMagazine / Social]
+  G --> H[Magazine / Instagram / Facebook / LinkedIn LLM]
+  H --> I[채널별 display output]
+
+  H --> J[Magazine raw sanitize]
+  J --> K[(Supabase Magazine raw)]
+  H --> L[Magazine HTML format API]
+  L --> M[formatMagazineHtml 후처리]
+  M --> N[HTML 미리보기 / 복사 / 다운로드]
+
+  I --> O[getSocialContentForStorage]
+  O --> P[(Supabase Social clean)]
 ```
 
-## 로컬 실행 방법
+---
+
+## 저장 정책
+
+| 채널 | Supabase `content` | 저장하지 않는 것 |
+|------|-------------------|------------------|
+| **Blog** | 채택 제목 + 본문 clean text | 추천 태그, 대체 제목, 시각화 제안, 자기점검, HTML |
+| **Magazine** | `magazineContentRaw` (순수 텍스트) | HTML, CSS, `[시각화 자료…]`, table 태그, Markdown 표 |
+| **Instagram / Facebook / LinkedIn** | social clean text | emoji, `#` 해시태그, Markdown heading/separator, 채널 라벨 |
+
+HTML/CSS 코드 복사·`.html` 다운로드는 **UI 편의 기능**이며 Supabase에는 저장되지 않습니다.
+
+---
+
+## 로컬 실행
 
 ```bash
 cd mvp_5w
@@ -57,16 +89,26 @@ cp .env.example .env.local   # 값 채우기
 npm run dev
 ```
 
-브라우저에서 [http://localhost:3000](http://localhost:3000) 을 엽니다.
+브라우저: [http://localhost:3000](http://localhost:3000)
 
 ```bash
-npm run lint   # ESLint
-npm run build  # 프로덕션 빌드
+npm run lint
+npm run build
 ```
 
-## 환경변수 설정
+### 단위·E2E 테스트 스크립트
 
-`mvp_5w/.env.example`을 복사해 `.env.local`을 만든 뒤 값을 채우세요. **`.env.local`은 Git에 올리지 마세요.**
+```bash
+npx tsx scripts/test-magazine-html-format.ts
+npx tsx scripts/test-content-storage.ts
+
+# dev server 실행 후 (ANTHROPIC_API_KEY 필요)
+node --env-file=.env.local $(which npx) tsx scripts/test-e2e-llm-pipeline.ts
+```
+
+---
+
+## 환경변수
 
 ### Vercel 필수 (MVP)
 
@@ -91,7 +133,7 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_BRAND_ASSET_BUCKET=
 ```
 
-### 실험 기능 전용 (MVP 1차 배포 불필요)
+### 실험 기능 전용 (기본 배포에 넣지 않음)
 
 ```env
 ANTHROPIC_BLOG_VISUAL_MODEL=
@@ -102,83 +144,109 @@ NEXT_PUBLIC_ENABLE_BLOG_VISUAL_GENERATOR=
 NEXT_PUBLIC_ENABLE_INSTAGRAM_CARDNEWS=
 ```
 
+**주의:** `.env.local`은 Git에 올리지 마세요. API 키·Supabase Secret은 서버 API Route에서만 사용합니다.
 
-| 변수 | MVP 필수 | 설명 |
-| --- | --- | --- |
-| `LLM_PROVIDER` | ✅ | `anthropic` (현재 지원 provider) |
-| `ANTHROPIC_API_KEY` | ✅ | Anthropic API 키. **코드에 직접 넣지 마세요.** |
-| `ANTHROPIC_DRAFT_MODEL` | ✅ | 5채널 원고 생성 |
-| `ANTHROPIC_BLOG_HTML_MODEL` | ✅ | 블로그 HTML 미리보기 포맷 변환 |
-| `APP_ACCESS_PASSWORD` | ✅ (Vercel) | 1차 팀 내부 테스트용 임시 접근 비밀번호 |
-| `SUPABASE_URL` | ✅ (Step 6) | Supabase 프로젝트 URL |
-| `SUPABASE_SECRET_KEY` | ✅ (Step 6) | 서버 API Route 전용 Secret Key |
-| `ANTHROPIC_OUTLINE_MODEL` | 선택 | 향후 아웃라인 단계용 |
-| `ANTHROPIC_REVIEW_MODEL` | 선택 | 향후 품질 검수용 |
-| `ANTHROPIC_BLOG_VISUAL_MODEL` | 실험 | 시각화 자동 생성 (없으면 `ANTHROPIC_DRAFT_MODEL` fallback) |
-| `ANTHROPIC_CARDNEWS_*` | 실험 | 인스타 카드뉴스 API |
-| `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_BRAND_ASSET_BUCKET` | 선택 | brand asset (visual 실험 API에서만 사용) |
+---
 
+## Vercel 배포
 
-API 키·Supabase Secret·접근 비밀번호는 **서버 API Route에서만** 사용됩니다. 클라이언트 코드에 하드코딩하지 마세요.
+1. 저장소 연결
+2. **Root Directory:** `mvp_5w`
+3. `.env.local` 업로드 금지 → Project Settings → Environment Variables에 필수 env 입력
+4. `main` push 시 자동 배포
+5. env 변경 후 **Redeploy** 필요
 
-- 생성: `POST /api/generate`
-- 블로그 HTML: `POST /api/blog-html-format`
-- 저장: `POST /api/content`
-- 접근 게이트: `POST /api/access`
+---
 
-주의:
+## 프롬프트·source·저장 위치
 
-- `.env.local`에는 secret 값이 들어가므로 GitHub에 올리지 마세요.
-- secret key에는 `NEXT_PUBLIC_` 접두사를 붙이지 마세요.
+상세 파일 맵: [`docs/PROMPTS.md`](docs/PROMPTS.md)
 
-## 내 작업 초기화
+| 항목 | 파일 |
+|------|------|
+| 채널별 기본 프롬프트 | `src/lib/prompts/base-prompts.ts` |
+| Blog 상세 지침 | `src/lib/prompts/channel-guides/naver-blog-guide.ts` |
+| 프롬프트 조립 (`buildPrompt`) | `src/lib/prompts/build-prompt.ts` |
+| Magazine HTML LLM 프롬프트 | `src/lib/prompts/magazine-html-format-prompt.ts` |
+| Magazine HTML 후처리 (table/FAQ/placeholder) | `src/lib/magazine/formatMagazineHtml.ts` |
+| Magazine standalone HTML | `src/lib/magazine/buildMagazineStandaloneHtml.ts` |
+| Blog source / 저장 | `src/lib/blog/getBlogContentForStorage.ts` |
+| Magazine 저장 sanitize | `src/lib/magazine/sanitizeMagazineRaw.ts` |
+| 소셜 UI·저장 sanitize | `src/lib/social/sanitizeSocialContent.ts` |
+| 저장 분기 | `src/app/page.tsx` → `resolveContentForSave()` |
+| 생성 트리거 | `src/hooks/useGeneration.ts` |
 
-초안 입력 영역 옆 **「내 작업 초기화」** 버튼으로 다음을 한 번에 비웁니다.
+---
 
-- 초안 입력, 5채널 생성 결과, 블로그 enhancement 상태
-- 브라우저 `localStorage` (`cssharing-` prefix 키 전체)
+## 테스트 방법
 
-Supabase에 이미 저장된 데이터는 삭제하지 않습니다.
+1. **Blog 생성** → HTML 미리보기·복사 확인
+2. **Magazine 생성** → table/FAQ/핵심/placeholder 위치 확인
+3. **Magazine HTML/CSS 코드 복사** → `.html` 저장 후 브라우저에서 table 스타일 확인
+4. **Instagram / Facebook / LinkedIn** → Blog 기반 생성, UI 라벨·Markdown 없음 확인
+5. **저장** → Supabase `content`가 채널별 clean text인지 확인
+6. **내 작업 초기화** → localStorage 비움 확인
 
-## Vercel 배포 (1차 팀 공유)
+---
 
-### 1차 배포 포함
+## UI 스크린샷
 
-- Step 1~4 (초안 입력, 유형/목표/톤, 5채널 생성, 복사/재생성/고도화/버전 되돌리기)
-- Blog 채널: 네이버 블로그 상세 지침 + HTML 미리보기 + 복사 버튼
-- Step 6 Supabase 저장 / ⭐ 고성과 저장 / 참고자료 재활용
-- 내 작업 초기화
-- 임시 접근 비밀번호 게이트 (`APP_ACCESS_PASSWORD`)
+샘플 데이터 기준 UI입니다. API 키·민감 정보는 포함하지 않았습니다.
 
-### 1차 배포 제외 (후속 확장)
+| 화면 | 스크린샷 |
+|------|----------|
+| 접근 비밀번호 게이트 | ![접근 게이트](docs/screenshots/access-gate.png) |
+| 메인 입력 | ![메인 입력](docs/screenshots/main-input.png) |
+| 네이버 블로그 HTML 미리보기 | ![블로그 미리보기](docs/screenshots/blog-preview.png) |
+| 홈페이지 매거진 HTML 미리보기 | ![매거진 미리보기](docs/screenshots/magazine-preview.png) |
+| Magazine 복사·다운로드 버튼 | ![매거진 export](docs/screenshots/magazine-export-buttons.png) |
+| 소셜 채널 출력 | ![소셜 출력](docs/screenshots/social-output.png) |
+| 내 작업 초기화 | ![초기화](docs/screenshots/reset-button.png) |
+| Magazine standalone HTML (table) | ![매거진 table](docs/screenshots/magazine-standalone-table.png) |
 
-- Step 5 Canva 카드뉴스 실제 연동
-- 블로그 시각화 자료 자동 생성 (MVP UI 숨김)
-- 인스타 카드뉴스 HTML/CSS 생성 (MVP UI 숨김)
-- Figma / 이미지 AI / PDF·PPTX export
-- 자동 발행
-- 정식 인증 / 로그인 / 권한 관리
-- 성과 분석 대시보드
+스크린샷 재생성:
 
-### Vercel 프로젝트 설정
+```bash
+npx tsx scripts/capture-readme-screenshots.ts
+```
 
-1. Vercel에 저장소를 연결합니다.
-2. **Root Directory**를 `mvp_5w`로 설정합니다.
-3. `.env.local` 파일을 업로드하지 않습니다.
-4. Project Settings → **Environment Variables**에 MVP 필수 env 7개를 입력합니다.
-5. 배포 후 팀원에게 URL과 접근 비밀번호를 공유합니다.
+---
 
-## 임시 접근 비밀번호 게이트
+## 프로젝트 구조
 
-- 환경변수: `APP_ACCESS_PASSWORD`
-- 검증: `POST /api/access`
-- 통과 후: 브라우저 `sessionStorage`에 접근 허용 상태 저장
-- **정식 로그인/권한 관리가 아닙니다.** 1차 팀 내부 테스트용입니다.
-- 로컬에서 `APP_ACCESS_PASSWORD`가 비어 있으면 게이트가 비활성화됩니다.
+```
+src/
+├── app/
+│   ├── page.tsx
+│   └── api/
+│       ├── generate/              # 5채널 LLM 생성
+│       ├── blog-html-format/      # 블로그 HTML 미리보기
+│       ├── magazine-html-format/  # 매거진 HTML + 후처리
+│       ├── content/               # Supabase 저장
+│       ├── references/            # 고성과 참고자료
+│       └── access/                # 임시 접근 게이트
+├── components/
+│   ├── blog/BlogOutputPanel.tsx
+│   ├── magazine/MagazineOutputPanel.tsx
+│   ├── social/SocialOutputPanel.tsx
+│   └── instagram/InstagramOutputPanel.tsx
+├── hooks/
+│   ├── useGeneration.ts
+│   ├── useBlogEnhancement.ts
+│   └── useMagazineEnhancement.ts
+└── lib/
+    ├── blog/
+    ├── magazine/
+    ├── social/
+    ├── prompts/
+    └── storage/
+```
 
-## Supabase 테이블 생성 (Step 6)
+---
 
-아래 SQL을 Supabase SQL Editor에서 실행하세요. 전체 스키마는 `docs/supabase-schema.sql`을 참고하세요.
+## Supabase 스키마
+
+`docs/supabase-schema.sql` 참고. 최소 테이블:
 
 ```sql
 create table if not exists contents (
@@ -193,76 +261,21 @@ create table if not exists contents (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
-
-create index if not exists idx_contents_channel_created_at
-on contents (channel, created_at desc);
-
-create index if not exists idx_contents_high_performance_created_at
-on contents (is_high_performance, created_at desc);
 ```
 
-Blog 저장 시 `content` 컬럼에는 LLM이 생성한 **raw 원문**이 들어갑니다.
+---
 
-## 데이터 저장
+## 내 작업 초기화
 
-### 브라우저 localStorage
+초안 입력 영역 옆 **「내 작업 초기화」** 버튼:
 
-키: `cssharing-content-os-v1`
+- 초안, 5채널 결과, enhancement 상태, `cssharing-` prefix localStorage 삭제
+- Supabase에 저장된 데이터는 **삭제하지 않음**
 
-- `draft`, `contentType`, `goal`, `tone`, `activeTab`
-- `outputs`, `refinements`, `globalRules`, `channelRules`, `channelExtra`
-- `blogEnhancement` (raw/HTML/parsed — visual asset은 persist하지 않음)
-- 「내 작업 초기화」 시 `cssharing-` prefix 키 전체 삭제
+---
 
-### Supabase (Step 6)
+## 임시 접근 비밀번호
 
-- `POST /api/content`: 현재 채널 결과 저장 (`⭐ 고성과 저장` 지원)
-- `GET /api/references`: 고성과(`is_high_performance=true`) 참고자료 최근순 조회
-
-## 이식한 핵심 로직
-
-`.shared_cssharing/` 참고용 코드에서 순수 JS 로직만 이식했습니다.
-
-- `BASE_PROMPTS` (MVP 5채널)
-- `buildPrompt()`
-- `DEFAULT_GLOBAL_RULES`
-- `TONES`, `TYPES`, `GOAL_CHANNELS`
-- 네이버 블로그 상세 지침 (`naver-blog-guide.ts`)
-- 고도화 이력 반영 (최근 3개 → 다음 `buildPrompt()`에 자동 반영)
-- 규칙 반영 (전역 + 채널별 ON/OFF)
-
-## 프로젝트 구조
-
-```
-src/
-├── app/
-│   ├── page.tsx
-│   └── api/
-│       ├── generate/route.ts       # 5채널 원고 생성
-│       ├── blog-html-format/route.ts  # 블로그 HTML 미리보기
-│       ├── content/route.ts        # Supabase 저장
-│       ├── references/route.ts     # 고성과 참고자료
-│       └── access/route.ts         # 임시 접근 게이트
-├── components/
-│   ├── DraftPanel.tsx              # 초안 + 내 작업 초기화
-│   ├── blog/BlogOutputPanel.tsx    # 블로그 탭 UI
-│   ├── instagram/InstagramOutputPanel.tsx
-│   ├── GenerationControls.tsx
-│   ├── ChannelTabs.tsx
-│   ├── ChannelOutput.tsx
-│   └── RightPanel.tsx
-├── hooks/
-│   ├── useContentState.ts
-│   ├── useGeneration.ts
-│   └── useBlogEnhancement.ts
-└── lib/
-    ├── blog/                       # 파서, HTML 복사, 타입
-    ├── prompts/
-    ├── llm/
-    ├── storage/supabase.ts
-    ├── features.ts                 # 실험 기능 feature flag
-    ├── types.ts
-    └── local-storage.ts
-```
-
-실험 코드(API route, visual/cardnews 컴포넌트 등)는 별도 커밋/브랜치로 관리할 수 있습니다.
+- 환경변수: `APP_ACCESS_PASSWORD`
+- 로컬에서 비어 있으면 게이트 비활성화
+- 정식 로그인/권한 관리가 아닌 1차 팀 내부 테스트용

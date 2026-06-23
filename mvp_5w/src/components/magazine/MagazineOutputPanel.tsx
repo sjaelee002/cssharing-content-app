@@ -2,16 +2,20 @@
 
 import { useState, type ReactNode } from "react";
 
-import { htmlToBlogText } from "@/lib/blog/copyHelpers";
 import { CH_LABELS, GOAL_CHANNELS } from "@/lib/prompts/constants";
 import { isValidOutput } from "@/lib/local-storage";
+import {
+  buildMagazineStandaloneHtml,
+  getMagazineHtmlDownloadFilename,
+} from "@/lib/magazine/buildMagazineStandaloneHtml";
+import { downloadTextFile } from "@/lib/blog/copyHelpers";
 import type {
-  BlogEnhancementState,
   ChannelSaveState,
   Goal,
+  MagazineEnhancementState,
 } from "@/lib/types";
 
-interface BlogOutputPanelProps {
+interface MagazineOutputPanelProps {
   goal: Goal;
   hasHydrated: boolean;
   output?: {
@@ -19,7 +23,7 @@ interface BlogOutputPanelProps {
     ts: string;
     history: { content: string; ts: string; instruction?: string }[];
   };
-  blogEnhancement: BlogEnhancementState;
+  magazineEnhancement: MagazineEnhancementState;
   isGenerating: boolean;
   isSaving: boolean;
   saveState?: ChannelSaveState;
@@ -33,13 +37,11 @@ interface BlogOutputPanelProps {
 function CollapsibleSection({
   title,
   children,
-  defaultOpen = false,
 }: {
   title: string;
   children: ReactNode;
-  defaultOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [open, setOpen] = useState(false);
 
   return (
     <section className="blog-section blog-collapsible">
@@ -56,63 +58,11 @@ function CollapsibleSection({
   );
 }
 
-function TagList({ tags }: { tags: string[] }) {
-  if (!tags.length) {
-    return <p className="blog-section-empty">추천 태그가 없습니다.</p>;
-  }
-  return (
-    <div className="blog-tag-list">
-      {tags.map((tag) => (
-        <span key={tag} className="blog-tag">
-          {tag}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-function VisualSuggestionCards({
-  suggestions,
-}: {
-  suggestions: NonNullable<BlogEnhancementState["blogParsed"]>["imageSuggestions"];
-}) {
-  if (!suggestions.length) {
-    return (
-      <p className="blog-section-empty">시각화 자료 삽입 제안이 없습니다.</p>
-    );
-  }
-  return (
-    <div className="blog-image-suggestion-grid">
-      {suggestions.map((img) => (
-        <div key={img.index} className="blog-image-suggestion-card">
-          <div className="blog-card-header">
-            <span className="blog-card-index">시각화 자료 {img.index}</span>
-            {img.position && (
-              <span className="blog-card-position">{img.position}</span>
-            )}
-          </div>
-          {img.imageType && (
-            <p className="blog-card-type">
-              <strong>유형</strong> {img.imageType}
-            </p>
-          )}
-          <p className="blog-card-desc">{img.description}</p>
-          {img.captionKeywords && (
-            <p className="blog-card-caption">
-              <strong>캡션 키워드</strong> {img.captionKeywords}
-            </p>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function BlogOutputPanel({
+export function MagazineOutputPanel({
   goal,
   hasHydrated,
   output,
-  blogEnhancement,
+  magazineEnhancement,
   isGenerating,
   isSaving,
   saveState,
@@ -121,41 +71,57 @@ export function BlogOutputPanel({
   onRegenerate,
   onRollback,
   onSave,
-}: BlogOutputPanelProps) {
+}: MagazineOutputPanelProps) {
   const goalMeta = GOAL_CHANNELS[goal];
   const hasContent = hasHydrated && isValidOutput(output?.content);
   const isError =
     hasHydrated && Boolean(output?.content?.startsWith("생성 실패"));
   const historyCount = hasHydrated ? (output?.history.length ?? 0) : 0;
-  const parsed = blogEnhancement.blogParsed;
+  const parsed = magazineEnhancement.magazineParsed;
+  const displayTitle =
+    parsed?.title || magazineEnhancement.magazineContentRaw.split("\n")[0] || "";
 
   const handleCopyHtml = () => {
-    if (blogEnhancement.blogContentHtml) {
-      onCopyHtml(blogEnhancement.blogContentHtml);
+    if (magazineEnhancement.magazineContentHtml) {
+      onCopyHtml(magazineEnhancement.magazineContentHtml);
     }
   };
 
-  const handleCopyBlogText = () => {
-    if (blogEnhancement.blogContentHtml) {
-      onCopyText(htmlToBlogText(blogEnhancement.blogContentHtml));
-    } else if (parsed?.bodyText) {
-      onCopyText(parsed.bodyText);
+  const handleCopyRaw = () => {
+    if (magazineEnhancement.magazineContentRaw) {
+      onCopyText(magazineEnhancement.magazineContentRaw);
     }
   };
 
-  const handleCopyPureBody = () => {
-    if (parsed?.bodyText) {
-      onCopyText(parsed.bodyText);
-    } else if (output?.content) {
-      onCopyText(output.content);
+  const handleCopyHtmlCode = () => {
+    if (magazineEnhancement.magazineContentHtml) {
+      const standalone = buildMagazineStandaloneHtml(
+        magazineEnhancement.magazineContentHtml,
+        displayTitle
+      );
+      onCopyText(standalone);
+    }
+  };
+
+  const handleDownloadHtml = () => {
+    if (magazineEnhancement.magazineContentHtml) {
+      const standalone = buildMagazineStandaloneHtml(
+        magazineEnhancement.magazineContentHtml,
+        displayTitle
+      );
+      downloadTextFile(
+        standalone,
+        getMagazineHtmlDownloadFilename(displayTitle),
+        "text/html;charset=utf-8"
+      );
     }
   };
 
   return (
-    <div className="channel-output blog-output-panel">
+    <div className="channel-output blog-output-panel magazine-output-panel">
       <div className="channel-output-header">
         <div className="channel-output-title">
-          <h2>{CH_LABELS.Blog}</h2>
+          <h2>{CH_LABELS.Magazine}</h2>
           <span className="goal-badge small" style={{ color: goalMeta.color }}>
             {goalMeta.group}
           </span>
@@ -181,33 +147,39 @@ export function BlogOutputPanel({
               </button>
             </>
           )}
-          {hasContent && blogEnhancement.blogContentHtml && (
-            <button
-              type="button"
-              className="ghost-btn recommended-copy-btn"
-              onClick={handleCopyHtml}
-            >
-              <span className="recommended-copy-label">네이버 에디터 추천</span>
-              📋 HTML 복사
-            </button>
-          )}
-          {hasContent && (
+          {hasContent && magazineEnhancement.magazineContentHtml && (
             <>
               <button
                 type="button"
                 className="ghost-btn"
-                onClick={handleCopyBlogText}
+                onClick={handleCopyHtml}
               >
-                📝 블로그 텍스트
+                📋 HTML 서식 포함 복사
               </button>
               <button
                 type="button"
                 className="ghost-btn"
-                onClick={handleCopyPureBody}
+                onClick={handleCopyHtmlCode}
               >
-                📄 순수 본문
+                🧾 HTML/CSS 코드 복사
+              </button>
+              <button
+                type="button"
+                className="ghost-btn"
+                onClick={handleDownloadHtml}
+              >
+                ⬇️ HTML 파일 다운로드
               </button>
             </>
+          )}
+          {hasContent && magazineEnhancement.magazineContentRaw && (
+            <button
+              type="button"
+              className="ghost-btn"
+              onClick={handleCopyRaw}
+            >
+              📄 순수 원문 복사
+            </button>
           )}
           <button
             type="button"
@@ -223,7 +195,7 @@ export function BlogOutputPanel({
       {isGenerating ? (
         <div className="output-placeholder loading">
           <div className="spinner" />
-          <p>네이버 블로그 콘텐츠 생성 중...</p>
+          <p>홈페이지 매거진 콘텐츠 생성 중...</p>
         </div>
       ) : hasHydrated && output?.content ? (
         <div className={`output-card ${isError ? "error" : ""}`}>
@@ -250,25 +222,29 @@ export function BlogOutputPanel({
           </div>
 
           <div className="blog-sections">
-            {parsed?.mainTitle && (
+            {displayTitle && (
               <div className="blog-adopted-title">
-                <span className="blog-adopted-label">채택 제목</span>
-                <h3>{parsed.mainTitle}</h3>
+                <span className="blog-adopted-label">매거진 제목</span>
+                <h3>{displayTitle}</h3>
               </div>
             )}
 
             <section className="blog-section">
               <h3 className="blog-section-title">HTML 미리보기</h3>
-              {blogEnhancement.htmlFormatting ? (
+              <p className="magazine-html-copy-info">
+                서식 포함 복사는 CMS 붙여넣기용이고, HTML/CSS 코드
+                복사·다운로드는 브라우저 미리보기 확인용입니다.
+              </p>
+              {magazineEnhancement.htmlFormatting ? (
                 <div className="blog-html-loading">
                   <div className="spinner small" />
                   <span>AI HTML 포맷 변환 중...</span>
                 </div>
-              ) : blogEnhancement.blogContentHtml ? (
+              ) : magazineEnhancement.magazineContentHtml ? (
                 <div
                   className="blog-html-preview"
                   dangerouslySetInnerHTML={{
-                    __html: blogEnhancement.blogContentHtml,
+                    __html: magazineEnhancement.magazineContentHtml,
                   }}
                 />
               ) : (
@@ -278,54 +254,31 @@ export function BlogOutputPanel({
               )}
             </section>
 
-            {parsed && (
+            {magazineEnhancement.magazineContentRaw && (
               <>
-                <section className="blog-section">
-                  <h3 className="blog-section-title">추천 태그</h3>
-                  <TagList tags={parsed.recommendedTags} />
-                </section>
-
-                <section className="blog-section">
-                  <h3 className="blog-section-title">대체 제목</h3>
-                  {parsed.alternateTitles.length > 0 ? (
-                    <ul className="blog-alt-titles">
-                      {parsed.alternateTitles.map((title, i) => (
-                        <li key={`${title}-${i}`}>{title}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="blog-section-empty">대체 제목이 없습니다.</p>
-                  )}
-                </section>
-
-                <section className="blog-section">
-                  <h3 className="blog-section-title">
-                    시각화 자료 삽입 제안
-                  </h3>
-                  <p className="blog-prompt-note">
-                    이 제안은 카드뉴스/디자인 생성 시 참고 자료로 활용됩니다.
-                  </p>
-                  <VisualSuggestionCards suggestions={parsed.imageSuggestions} />
-                </section>
-
-                <CollapsibleSection title="원문 보기">
+                <p className="magazine-save-info">
+                  <span
+                    className="magazine-info-icon"
+                    title="저장 시 HTML 표는 문장형 텍스트로 풀어서 저장되며, 시각화 자료 placeholder는 저장되지 않습니다. HTML 미리보기와 복사는 CMS 편집용입니다. 예: HTML 표 → '직접 인력 확충과 CS쉐어링 서비스는 온보딩 기간, 비용, 운영 방식에서 차이가 있습니다…' 형태로 저장"
+                    aria-label="저장 안내"
+                  >
+                    ⓘ
+                  </span>
+                  저장 시 HTML 표·시각화 placeholder는 제외되고 순수 원문만
+                  저장됩니다.
+                </p>
+                <CollapsibleSection title="순수 원문 보기">
                   <div className="output-content blog-raw-content">
-                    {output.content}
+                    {magazineEnhancement.magazineContentRaw}
                   </div>
                 </CollapsibleSection>
-
-                {parsed.selfCheckText && (
-                  <CollapsibleSection title="자기점검 보기">
-                    <div className="blog-self-check">{parsed.selfCheckText}</div>
-                  </CollapsibleSection>
-                )}
               </>
             )}
           </div>
         </div>
       ) : (
         <div className="output-placeholder">
-          <p className="placeholder-title">네이버 블로그 콘텐츠 없음</p>
+          <p className="placeholder-title">홈페이지 매거진 콘텐츠 없음</p>
           <p className="placeholder-sub">
             왼쪽 ⚡ 전체 채널 생성을 클릭하세요
           </p>

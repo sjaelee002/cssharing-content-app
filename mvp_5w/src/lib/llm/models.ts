@@ -50,10 +50,15 @@ export function getMaxTokensForChannel(channel: Channel): number {
     return 5000;
   }
   if (channel === "Magazine") {
-    return 3000;
+    return 6000;
   }
   if (channel === "Instagram") {
     return 1200;
   }
   return 2000;
+}
+
+/** Magazine HTML 포맷 변환 max_tokens (기존 6000 → 10000) */
+export function getMagazineHtmlMaxTokens(): number {
+  return 10000;
 }

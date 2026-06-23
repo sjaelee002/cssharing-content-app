@@ -4,7 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 
 import { AccessGate } from "@/components/AccessGate";
 import { BlogOutputPanel } from "@/components/blog/BlogOutputPanel";
+import { MagazineOutputPanel } from "@/components/magazine/MagazineOutputPanel";
 import { InstagramOutputPanel } from "@/components/instagram/InstagramOutputPanel";
+import { SocialOutputPanel } from "@/components/social/SocialOutputPanel";
 import { ChannelOutput } from "@/components/ChannelOutput";
 import { ChannelTabs } from "@/components/ChannelTabs";
 import { DraftPanel } from "@/components/DraftPanel";
@@ -12,8 +14,15 @@ import { GenerationControls } from "@/components/GenerationControls";
 import { RightPanel } from "@/components/RightPanel";
 import { useContentState } from "@/hooks/useContentState";
 import { useBlogEnhancement } from "@/hooks/useBlogEnhancement";
+import { useMagazineEnhancement } from "@/hooks/useMagazineEnhancement";
 import { useInstagramCardnews } from "@/hooks/useInstagramCardnews";
 import { useGeneration } from "@/hooks/useGeneration";
+import { getBlogContentForStorage } from "@/lib/blog/getBlogContentForStorage";
+import { getMagazineContentForStorage } from "@/lib/magazine/sanitizeMagazineRaw";
+import {
+  getSocialContentForStorage,
+  isSocialChannel,
+} from "@/lib/social/sanitizeSocialContent";
 import type {
   Channel,
   ContentType,
@@ -63,6 +72,12 @@ function ContentOsApp() {
       onToast: showToast,
     });
 
+  const { processMagazineContent } = useMagazineEnhancement({
+    dispatch,
+    addLog,
+    onToast: showToast,
+  });
+
   const { generateCardnews } = useInstagramCardnews({
     dispatch,
     addLog,
@@ -75,6 +90,8 @@ function ContentOsApp() {
     addLog,
     onToast: showToast,
     onBlogGenerated: processBlogContent,
+    onMagazineGenerated: (content) =>
+      processMagazineContent(content, state.blogEnhancement),
   });
 
   const handleCopy = useCallback(
@@ -126,6 +143,16 @@ function ContentOsApp() {
     void processBlogContent(prev.content);
   }, [dispatch, processBlogContent, state.outputs.Blog]);
 
+  const handleMagazineRollback = useCallback(() => {
+    const out = state.outputs.Magazine;
+    if (!out?.history.length) {
+      return;
+    }
+    const prev = out.history[out.history.length - 1];
+    dispatch({ type: "ROLLBACK_OUTPUT", payload: "Magazine" });
+    void processMagazineContent(prev.content, state.blogEnhancement);
+  }, [dispatch, processMagazineContent, state.blogEnhancement, state.outputs.Magazine]);
+
   useEffect(() => {
     if (!hasHydrated) {
       return;
@@ -143,6 +170,46 @@ function ContentOsApp() {
     void processBlogContent(blogOutput);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasHydrated]);
+
+  useEffect(() => {
+    if (!hasHydrated) {
+      return;
+    }
+    const magazineOutput = state.outputs.Magazine?.content;
+    if (!magazineOutput || magazineOutput.startsWith("생성 실패")) {
+      return;
+    }
+    if (
+      state.magazineEnhancement.magazineContentRaw &&
+      state.magazineEnhancement.magazineContentHtml
+    ) {
+      return;
+    }
+    void processMagazineContent(magazineOutput, state.blogEnhancement);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasHydrated]);
+
+  const resolveContentForSave = useCallback(
+    (channel: Channel, outputContent: string): string => {
+      if (channel === "Blog") {
+        return getBlogContentForStorage(
+          outputContent,
+          state.blogEnhancement
+        );
+      }
+      if (channel === "Magazine") {
+        return getMagazineContentForStorage(
+          state.magazineEnhancement,
+          outputContent
+        );
+      }
+      if (isSocialChannel(channel)) {
+        return getSocialContentForStorage(channel, outputContent);
+      }
+      return outputContent;
+    },
+    [state.blogEnhancement, state.magazineEnhancement]
+  );
 
   const refreshReferences = useCallback(async () => {
     setReferencesLoading(true);
@@ -170,6 +237,7 @@ function ContentOsApp() {
 
       setSavingChannels((prev) => ({ ...prev, [channel]: true }));
       try {
+        const contentToSave = resolveContentForSave(channel, output.content);
         const response = await fetch("/api/content", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -179,7 +247,7 @@ function ContentOsApp() {
             goal: state.goal,
             tone: state.tone,
             draft: state.draft,
-            content: output.content,
+            content: contentToSave,
             isHighPerformance,
           }),
         });
@@ -222,7 +290,7 @@ function ContentOsApp() {
         setSavingChannels((prev) => ({ ...prev, [channel]: false }));
       }
     },
-    [addLog, dispatch, refreshReferences, showToast, state]
+    [addLog, dispatch, refreshReferences, resolveContentForSave, showToast, state]
   );
 
   const handleToggleReferencesEnabled = useCallback(() => {
@@ -313,6 +381,23 @@ function ContentOsApp() {
                 handleSaveChannel("Blog", isHighPerformance)
               }
             />
+          ) : state.activeTab === "Magazine" ? (
+            <MagazineOutputPanel
+              goal={state.goal}
+              hasHydrated={hasHydrated}
+              output={state.outputs.Magazine}
+              magazineEnhancement={state.magazineEnhancement}
+              isGenerating={Boolean(state.generating.Magazine)}
+              isSaving={Boolean(savingChannels.Magazine)}
+              saveState={state.channelSaveState.Magazine}
+              onCopyText={handleCopy}
+              onCopyHtml={handleCopyHtml}
+              onRegenerate={() => generateChannel("Magazine")}
+              onRollback={handleMagazineRollback}
+              onSave={(isHighPerformance) =>
+                handleSaveChannel("Magazine", isHighPerformance)
+              }
+            />
           ) : state.activeTab === "Instagram" ? (
             <InstagramOutputPanel
               goal={state.goal}
@@ -337,6 +422,24 @@ function ContentOsApp() {
                   state.outputs.Instagram?.content,
                   state.tone
                 )
+              }
+            />
+          ) : state.activeTab === "Facebook" || state.activeTab === "LinkedIn" ? (
+            <SocialOutputPanel
+              channel={state.activeTab}
+              goal={state.goal}
+              hasHydrated={hasHydrated}
+              output={state.outputs[state.activeTab]}
+              isGenerating={Boolean(state.generating[state.activeTab])}
+              isSaving={Boolean(savingChannels[state.activeTab])}
+              saveState={state.channelSaveState[state.activeTab]}
+              onCopy={handleCopy}
+              onRegenerate={() => generateChannel(state.activeTab)}
+              onRollback={() =>
+                dispatch({ type: "ROLLBACK_OUTPUT", payload: state.activeTab })
+              }
+              onSave={(isHighPerformance) =>
+                handleSaveChannel(state.activeTab, isHighPerformance)
               }
             />
           ) : (

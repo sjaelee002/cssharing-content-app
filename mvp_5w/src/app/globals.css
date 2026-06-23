@@ -342,6 +342,27 @@ select {
   font-weight: 600;
 }
 
+.ghost-btn.recommended-copy-btn {
+  border-color: #2ab2f5;
+  background: #eef9ff;
+  color: #0b6e99;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.recommended-copy-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background: #2ab2f5;
+  color: #fff;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
 .ghost-btn.small {
   padding: 5px 12px;
   font-size: 12px;
@@ -536,6 +557,75 @@ select {
   text-align: center;
   font-size: 13px;
   font-weight: 500;
+}
+
+.magazine-output-panel .blog-html-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 13px;
+}
+
+.magazine-output-panel .blog-html-preview th,
+.magazine-output-panel .blog-html-preview td {
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.magazine-output-panel .blog-html-preview th {
+  background: var(--primary-bg);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.magazine-output-panel .blog-html-preview .magazine-visual-placeholder {
+  margin: 16px 0;
+  padding: 18px 20px;
+  border: 2px dashed #7c3aed;
+  border-radius: 8px;
+  background: #f5f0ff;
+  color: #5b21b6;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.magazine-save-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 0 8px;
+  font-size: 11px;
+  color: var(--text-sub);
+  line-height: 1.5;
+}
+
+.magazine-html-copy-info {
+  margin: 0 0 10px;
+  font-size: 11px;
+  color: var(--text-sub);
+  line-height: 1.5;
+}
+
+.social-output-panel .social-body {
+  white-space: pre-wrap;
+}
+
+.magazine-info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  cursor: help;
 }
 
 .blog-html-loading {

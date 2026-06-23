@@ -1,12 +1,11 @@
 "use client";
 
-import { ChannelOutput } from "@/components/ChannelOutput";
+import { SocialOutputPanel } from "@/components/social/SocialOutputPanel";
 import { InstagramCardnewsPanel } from "@/components/instagram/InstagramCardnewsPanel";
 import { isInstagramCardnewsEnabled } from "@/lib/features";
 import type { InstagramCardnewsState } from "@/lib/instagram/types";
 import type {
   BlogEnhancementState,
-  Channel,
   ChannelSaveState,
   Goal,
 } from "@/lib/types";
@@ -46,13 +45,12 @@ export function InstagramOutputPanel({
   onSave,
   onGenerateCardnews,
 }: InstagramOutputPanelProps) {
-  const channel: Channel = "Instagram";
   const showCardnews = isInstagramCardnewsEnabled();
 
   return (
     <div className="instagram-output-panel">
-      <ChannelOutput
-        channel={channel}
+      <SocialOutputPanel
+        channel="Instagram"
         goal={goal}
         hasHydrated={hasHydrated}
         output={output}

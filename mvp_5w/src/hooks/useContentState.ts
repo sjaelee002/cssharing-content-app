@@ -4,6 +4,7 @@ import { useCallback, useEffect, useReducer } from "react";
 
 import { createDefaultGlobalRules } from "@/lib/prompts/default-rules";
 import { createEmptyBlogEnhancement } from "@/lib/blog/types";
+import { createEmptyMagazineEnhancement } from "@/lib/magazine/types";
 import { createEmptyInstagramCardnews } from "@/lib/instagram/types";
 import { normalizeBlogEnhancement, normalizeVisualAssets } from "@/lib/blog/normalizeVisualAssets";
 import {
@@ -22,6 +23,7 @@ import type {
   Goal,
   LogEntry,
   LogType,
+  MagazineEnhancementState,
   PersistedState,
   RightPanel,
   Rule,
@@ -76,6 +78,11 @@ type Action =
   | { type: "CLEAR_LOG" }
   | { type: "SET_BLOG_ENHANCEMENT"; payload: Partial<BlogEnhancementState> }
   | { type: "RESET_BLOG_ENHANCEMENT" }
+  | {
+      type: "SET_MAGAZINE_ENHANCEMENT";
+      payload: Partial<MagazineEnhancementState>;
+    }
+  | { type: "RESET_MAGAZINE_ENHANCEMENT" }
   | { type: "RESET_WORK" }
   | {
       type: "SET_INSTAGRAM_CARDNEWS";
@@ -98,6 +105,7 @@ function createInitialState(): ContentState {
     selectedReferenceIds: defaults.selectedReferenceIds,
     hasHydrated: false,
     blogEnhancement: createEmptyBlogEnhancement(),
+    magazineEnhancement: createEmptyMagazineEnhancement(),
     instagramCardnews: createEmptyInstagramCardnews(),
   };
 }
@@ -136,6 +144,13 @@ function reducer(state: ContentState, action: Action): ContentState {
               visualGenerating: false,
             } as BlogEnhancementState)
           : createEmptyBlogEnhancement(),
+        magazineEnhancement: action.payload.magazineEnhancement
+          ? {
+              ...createEmptyMagazineEnhancement(),
+              ...action.payload.magazineEnhancement,
+              htmlFormatting: false,
+            }
+          : createEmptyMagazineEnhancement(),
         instagramCardnews: action.payload.instagramCardnews
           ? {
               ...createEmptyInstagramCardnews(),
@@ -338,6 +353,9 @@ function reducer(state: ContentState, action: Action): ContentState {
         ...(channel === "Blog"
           ? { blogEnhancement: createEmptyBlogEnhancement() }
           : {}),
+        ...(channel === "Magazine"
+          ? { magazineEnhancement: createEmptyMagazineEnhancement() }
+          : {}),
       };
     }
 
@@ -365,6 +383,9 @@ function reducer(state: ContentState, action: Action): ContentState {
         ...(channel === "Blog"
           ? { blogEnhancement: createEmptyBlogEnhancement() }
           : {}),
+        ...(channel === "Magazine"
+          ? { magazineEnhancement: createEmptyMagazineEnhancement() }
+          : {}),
       };
     }
 
@@ -391,6 +412,9 @@ function reducer(state: ContentState, action: Action): ContentState {
         },
         ...(channel === "Blog"
           ? { blogEnhancement: createEmptyBlogEnhancement() }
+          : {}),
+        ...(channel === "Magazine"
+          ? { magazineEnhancement: createEmptyMagazineEnhancement() }
           : {}),
       };
     }
@@ -432,6 +456,21 @@ function reducer(state: ContentState, action: Action): ContentState {
       return {
         ...state,
         blogEnhancement: createEmptyBlogEnhancement(),
+      };
+
+    case "SET_MAGAZINE_ENHANCEMENT":
+      return {
+        ...state,
+        magazineEnhancement: {
+          ...state.magazineEnhancement,
+          ...action.payload,
+        },
+      };
+
+    case "RESET_MAGAZINE_ENHANCEMENT":
+      return {
+        ...state,
+        magazineEnhancement: createEmptyMagazineEnhancement(),
       };
 
     case "RESET_WORK":
@@ -489,6 +528,11 @@ export function useContentState() {
         blogContentHtml: state.blogEnhancement.blogContentHtml,
         blogParsed: state.blogEnhancement.blogParsed,
       },
+      magazineEnhancement: {
+        magazineContentRaw: state.magazineEnhancement.magazineContentRaw,
+        magazineContentHtml: state.magazineEnhancement.magazineContentHtml,
+        magazineParsed: state.magazineEnhancement.magazineParsed,
+      },
       instagramCardnews: {
         storyboard: state.instagramCardnews.storyboard,
         cardnewsHtml: state.instagramCardnews.cardnewsHtml,
@@ -515,6 +559,9 @@ export function useContentState() {
     state.blogEnhancement.blogContentRaw,
     state.blogEnhancement.blogContentHtml,
     state.blogEnhancement.blogParsed,
+    state.magazineEnhancement.magazineContentRaw,
+    state.magazineEnhancement.magazineContentHtml,
+    state.magazineEnhancement.magazineParsed,
     state.instagramCardnews.storyboard,
     state.instagramCardnews.cardnewsHtml,
     state.instagramCardnews.caption,

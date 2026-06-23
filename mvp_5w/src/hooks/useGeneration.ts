@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 
+import { getBlogSourceForMagazine, getBlogSourceForSocial } from "@/lib/blog/getBlogContentForStorage";
 import { buildPrompt } from "@/lib/prompts/build-prompt";
 import { NAVER_BLOG_GUIDE_MARKER } from "@/lib/prompts/channel-guides/naver-blog-guide";
 import { GENERATION_DELAY_MS, MVP_CHANNELS } from "@/lib/prompts/constants";
@@ -15,6 +16,7 @@ interface UseGenerationOptions {
   addLog: (msg: string, type?: LogType) => void;
   onToast?: (msg: string) => void;
   onBlogGenerated?: (content: string) => void;
+  onMagazineGenerated?: (content: string) => void;
 }
 
 async function callGenerateApi(prompt: string, channel: Channel) {
@@ -50,6 +52,7 @@ export function useGeneration({
   addLog,
   onToast,
   onBlogGenerated,
+  onMagazineGenerated,
 }: UseGenerationOptions) {
   const hasDraft = state.draft.trim().length > 0;
 
@@ -70,13 +73,28 @@ export function useGeneration({
       );
 
       try {
+        const isSocial =
+          channel === "Instagram" ||
+          channel === "Facebook" ||
+          channel === "LinkedIn";
+        const blogSource =
+          channel === "Magazine" || isSocial
+            ? (isSocial ? getBlogSourceForSocial : getBlogSourceForMagazine)(
+                state.blogEnhancement,
+                state.outputs.Blog?.content
+              )
+            : null;
         const prompt = buildPrompt(
           channel,
           toPromptContext(state),
-          extraInstruction
+          extraInstruction,
+          blogSource
         );
         if (channel === "Blog") {
           addLog(`Blog 프롬프트에 ${NAVER_BLOG_GUIDE_MARKER} 포함 확인`, "info");
+        }
+        if (blogSource && channel !== "Blog") {
+          addLog(`${channel} 생성: 네이버 블로그 본문 source 사용`, "info");
         }
         const content = await callGenerateApi(prompt, channel);
 
@@ -99,6 +117,10 @@ export function useGeneration({
           onBlogGenerated?.(content);
         }
 
+        if (channel === "Magazine" && !content.startsWith("생성 실패")) {
+          onMagazineGenerated?.(content);
+        }
+
         if (isRefinement) {
           onToast?.("✅ 고도화 완료! 다음 생성 시 자동 반영됩니다.");
         }
@@ -118,7 +140,7 @@ export function useGeneration({
         });
       }
     },
-    [addLog, dispatch, hasDraft, onBlogGenerated, onToast, state]
+    [addLog, dispatch, hasDraft, onBlogGenerated, onMagazineGenerated, onToast, state]
   );
 
   const generateAll = useCallback(async () => {
